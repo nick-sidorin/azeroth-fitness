@@ -27,6 +27,12 @@ jobs:
             version="${GITHUB_REF_NAME#v}"
             grep -q "^## Version: ${version}$" AzerothFitness.toc
           fi
+      - name: Validate Lua syntax
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.1
+          luac5.1 -p Bootstrap.lua Core.lua Jump.lua Locale.lua Motion.lua UI.lua
       - name: Pack installable addon
         shell: bash
         run: |
