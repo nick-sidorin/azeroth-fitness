@@ -1,0 +1,16 @@
+## Interface: 16001
+## AllowLoadGameType: camelot
+## Title: Azeroth Fitness
+## Title-ruRU: Фитнес Азерота
+## Notes: A very serious fitness tracker for a very sedentary adventurer.
+## Notes-ruRU: Очень серьёзный фитнес-трекер для сидячего героя.
+## Author: nick-sidorin
+## Version: 0.1.0
+## SavedVariables: AzerothFitnessDB
+
+Locale.lua
+Core.lua
+Motion.lua
+Jump.lua
+UI.lua
+Bootstrap.lua
