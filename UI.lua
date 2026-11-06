@@ -282,6 +282,7 @@ function UI:Refresh()
       local width = range == 7 and 60 or 11
       local gap = range == 7 and 8 or 4.1
       b:SetWidth(width)
+      b:ClearAllPoints()
       b:SetPoint("BOTTOMLEFT", b:GetParent(), "BOTTOMLEFT", 14 + (i - 1) * (width + gap), 30)
       b.fill:SetWidth(width)
       b.fill:SetHeight(math.max(0.5, 205 * steps / maximum))
