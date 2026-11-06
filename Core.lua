@@ -62,7 +62,7 @@ local function addYards(ledger, mode, yards, seconds, source, steps, murlos)
   ledger.steps = ledger.steps + steps
   ledger.murlos = ledger.murlos + murlos
   ledger.moveSeconds = ledger.moveSeconds + seconds
-  if source == "position" or source == "speed" then
+  if AF.FOOT[mode] and (source == "position" or source == "speed") then
     ledger.coverage[source] = (ledger.coverage[source] or 0) + yards
   end
 end
@@ -203,6 +203,11 @@ function AF:Login()
   char.total = char.total or self:NewLedger()
   char.total.yards = char.total.yards or {}
   char.total.coverage = char.total.coverage or { position = 0, speed = 0 }
+  for _, day in pairs(char.days) do
+    day.yards = day.yards or {}
+    day.coverage = day.coverage or { position = 0, speed = 0 }
+    day.goal = day.goal or char.goal
+  end
   char.achievements = char.achievements or {}
   self.char = char
   self:Today()
