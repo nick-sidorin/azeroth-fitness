@@ -55,6 +55,8 @@ Based on the publicly available Trailblazer addon manifest, the TOC targets Inte
 
 The public source of [Trailblazer](https://github.com/Pinta365/wow-trailblazer) was studied for API and algorithm design. This project independently implements its own modules and does not copy any source or stride table. Trailblazer's repository did not expose a license in the inspected metadata; direct code copying would require appropriate permission.
 
+For contributors and coding agents: start with [AGENTS.md](AGENTS.md) and the [complete project and decision handoff](docs/PROJECT_CONTEXT.md).
+
 See [technical research](docs/RESEARCH.md), [changelog](CHANGELOG.md) and [MIT license](LICENSE).
 
 Unaffiliated with Apple, Blizzard or the WoW: Forever team.
