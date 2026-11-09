@@ -19,11 +19,11 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 
 ## Installation
 
-1. Obtain the release ZIP and extract it to the Forever Interface/AddOns directory.
+1. Download a test ZIP from [GitHub Actions](https://github.com/nick-sidorin/azeroth-fitness/actions) or a published version from [GitHub Releases](https://github.com/nick-sidorin/azeroth-fitness/releases), then extract it to the Forever Interface/AddOns directory.
 2. The extracted folder must be named AzerothFitness and contain AzerothFitness.toc at the top level.
 3. Enable the addon and use /af in game.
 
-The GitHub source ZIP is not the packaged addon; a ZIP is assembled by GitHub Actions on tagged releases.
+Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP. The GitHub source ZIP is not the packaged addon. Test builds retain the current TOC version and remain experimental until verified in Forever.
 
 ## Commands
 
@@ -71,3 +71,24 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 - [ ] Calibration and automated tests
 - [ ] More polished charts/activity rings
 - [ ] Public release after verification
+
+## Development, builds and releases
+
+This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
+
+Run the shared gate locally with Python 3.9+ and Lua 5.1:
+
+```sh
+bash scripts/run_ci.sh
+python3 scripts/package_addon.py dist/AzerothFitness-v0.1.0.zip
+```
+
+The gate discovers `tests/test_*.lua`, validates all addon/test Lua syntax with `luac5.1`, runs the Lua suites and Python packaging tests, and verifies Forever metadata and TOC/Core version consistency. Tests use mocked APIs; they do not establish in-game compatibility. `scripts/package_addon.py` builds a reproducible ZIP from the TOC plus LICENSE and verifies every member against source bytes. Internal docs, scripts and tests are excluded.
+
+**PR and manual builds:** [Build and release](.github/workflows/release.yml) runs on PRs targeting `main`, manual dispatch, and `v*` tags. New PR commits cancel superseded checks. Ordinary pushes to `main` do not run build CI. For a fresh preview after merging, use **Actions → Build and release → Run workflow** on `main`. Download the `AzerothFitness-v<version>` artifact; it is already an installable ZIP.
+
+**Explicit publication:** [Publish requested version](.github/workflows/publish.yml) watches [`.github/release-request.txt`](.github/release-request.txt) on `main` and also supports manual dispatch on `main`. `none` means no release is requested. After owner approval and a Forever smoke test, prepare a PR with matching TOC/Core versions, changelog and a request such as `0.1.0-beta.1`. After squash merge the publisher repeats the shared checks, rejects existing tags, builds the ZIP, creates an annotated tag and publishes a GitHub Release. Alpha/beta requests produce prereleases; `0.1.0` produces a stable Release. Version changes must update both `AzerothFitness.toc` and `AF.VERSION` in `Core.lua`.
+
+The tag workflow remains available for explicitly approved manual tags. A tag pushed by the publisher's default `GITHUB_TOKEN` does not trigger another workflow, so the publisher creates its release directly. Build and release setup alone does not authorize a public release.
+
+**CurseForge:** [`.pkgmeta`](.pkgmeta) prepares the flat addon folder for native GitHub source packaging. The owner must connect this project and its tag webhook separately; no CurseForge connection or successful publication is implied. Do not add a second Actions uploader or commit author tokens. [`CURSEFORGE_DESCRIPTION.md`](CURSEFORGE_DESCRIPTION.md) is the reusable short/full listing source; the owner updates the listing manually. GitHub Release success and CurseForge availability are separate checks.

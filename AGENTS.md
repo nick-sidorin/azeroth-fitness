@@ -31,3 +31,11 @@ The existing **v0.1.0** code is an unverified experimental baseline. First inspe
 ## Maintaining context
 
 Update docs/PROJECT_CONTEXT.md when a major technical/product decision is validated. Clearly separate **requested**, **implemented in source**, **verified in game**, and **released** status so a future Codex session can continue without relying on chat memory.
+
+## Build and release workflow
+
+- Run `bash scripts/run_ci.sh` with Python 3.9+, `lua5.1` and `luac5.1`. Add regression tests for behavior changes. Use `scripts/package_addon.py` for ZIPs; the TOC plus LICENSE defines installable contents.
+- Follow the No Quest Hints Forever process: PR checks named `build`, manual previews, squash merge, and a separate explicit release request. Ordinary main pushes do not run build CI. The owner manages repository settings; do not claim required checks are enforced without inspecting them.
+- Give the owner a direct GitHub Actions artifact link for previews. Artifact downloads must contain `AzerothFitness/` immediately, without another ZIP inside. Keep preview versions unchanged unless a release is requested.
+- `.github/release-request.txt` starts at `none`. Change it to a version, bump TOC/Core versions, or create tags only for an owner-requested release after Forever QA. The publisher reuses the full CI gate; alpha/beta suffixes mark prereleases.
+- Keep `CHANGELOG.md` and `CURSEFORGE_DESCRIPTION.md` current for user-facing releases. `.pkgmeta` supports native CurseForge source packaging once the owner connects the project/webhook; do not add another uploader or assume that GitHub publication proves CurseForge availability.
