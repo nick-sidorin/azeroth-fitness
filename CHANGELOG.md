@@ -3,7 +3,15 @@
 Versions follow Semantic Versioning.
 
 ## [Unreleased]
-- Live Forever client compatibility testing and bug fixes.
+### Added
+- PR and manual preview builds using the `build` check, matching the No Quest Hints Forever workflow
+- Shared Lua 5.1 syntax and mocked regression gates for accounting, motion and jump logic
+- TOC-derived reproducible ZIP packaging with archive regression tests and direct-install test artifacts
+- Explicit release-request publisher for approved stable and alpha/beta releases
+- CurseForge source-packager configuration and reusable listing description
+
+### Still required
+- Live Forever client compatibility testing and measurement fixes; addon runtime remains unchanged from the experimental 0.1.0 baseline
 
 ## [0.1.0] - 2026-11-06
 ### Added

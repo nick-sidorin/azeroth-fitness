@@ -3,3 +3,6 @@
 .idea/
 .vscode/
 *.swp
+dist/
+__pycache__/
+*.pyc

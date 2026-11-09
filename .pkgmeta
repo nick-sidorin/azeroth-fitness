@@ -1,0 +1,19 @@
+# Used by CurseForge's source packager after the owner connects this project.
+package-as: AzerothFitness
+enable-nolib-creation: no
+
+ignore:
+  - tests
+  - scripts
+  - docs
+  - .github
+  - .gitignore
+  - AGENTS.md
+  - README.md
+  - CHANGELOG.md
+  - CURSEFORGE_DESCRIPTION.md
+  - dist
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown

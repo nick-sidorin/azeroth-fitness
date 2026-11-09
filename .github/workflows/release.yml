@@ -1,52 +1,108 @@
-name: Release ZIP
+name: Build and release
 
+# No checks on ordinary pushes to main. Pull requests run CI.
+# Manual builds remain available, and version tags can build a release ZIP.
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
   workflow_dispatch:
 
+# Cancel superseded PR runs to avoid a pile of failed/outdated checks.
+concurrency:
+  group: addon-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  package:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      filename: ${{ steps.version.outputs.filename }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check sources
-        shell: bash
-        run: |
-          set -euo pipefail
-          for file in AzerothFitness.toc Bootstrap.lua Core.lua Jump.lua Locale.lua Motion.lua UI.lua README.md LICENSE; do
-            test -s "$file"
-          done
-          grep -q '^## Interface: 16001$' AzerothFitness.toc
-          grep -q '^## AllowLoadGameType: camelot$' AzerothFitness.toc
-          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
-            version="${GITHUB_REF_NAME#v}"
-            grep -q "^## Version: ${version}$" AzerothFitness.toc
-          fi
-      - name: Validate Lua syntax
-        shell: bash
+
+      - name: Install Lua 5.1
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lua5.1
-          luac5.1 -p Bootstrap.lua Core.lua Jump.lua Locale.lua Motion.lua UI.lua
-      - name: Pack installable addon
+
+      - name: Regression, Lua syntax and manifest gates
+        run: bash scripts/run_ci.sh
+
+      - name: Validate addon version
+        id: version
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist/AzerothFitness
-          cp AzerothFitness.toc Bootstrap.lua Core.lua Jump.lua Locale.lua Motion.lua UI.lua LICENSE dist/AzerothFitness/
-          (cd dist && zip -qr "../AzerothFitness-${GITHUB_REF_NAME:-dev}.zip" AzerothFitness)
-      - name: Upload workflow artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: azeroth-fitness-addon
-          path: AzerothFitness-*.zip
-      - name: Publish GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
+          version="$(sed -n 's/^## Version: *//p' AzerothFitness.toc | head -n 1 | tr -d '\r')"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo '::error::Invalid or missing addon version in TOC'
+            exit 1
+          fi
+          release_version="$version"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            tag_version="${GITHUB_REF_NAME#v}"
+            if [[ "$GITHUB_REF_NAME" != "v$tag_version" ||
+                  ! "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)(\.[0-9]+)?)?$ ||
+                  "${tag_version%%-*}" != "$version" ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match TOC version v$version"
+              exit 1
+            fi
+            release_version="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$release_version" >> "$GITHUB_OUTPUT"
+          echo "filename=AzerothFitness-v$release_version.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Package and verify installable addon
+        shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" AzerothFitness-*.zip --title "Azeroth Fitness $GITHUB_REF_NAME" --notes-file CHANGELOG.md --prerelease
+          FILENAME: ${{ steps.version.outputs.filename }}
+        run: |
+          set -euo pipefail
+          python3 scripts/package_addon.py "dist/$FILENAME"
+
+      # GitHub wraps artifacts in a ZIP itself. For test builds upload the
+      # verified addon folder so the download is directly installable.
+      - name: Prepare single-ZIP test download
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          FILENAME: ${{ steps.version.outputs.filename }}
+        run: python3 -m zipfile -e "dist/$FILENAME" dist/installable
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        with:
+          name: AzerothFitness-v${{ steps.version.outputs.version }}
+          path: dist/installable/
+          if-no-files-found: error
+
+      # Tagged releases still transfer the canonical ZIP to the release job.
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: addon-${{ steps.version.outputs.version }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  github-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: addon-${{ needs.build.outputs.version }}
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}

@@ -2,6 +2,7 @@
 
 > **Read this before making product or implementation decisions.**
 > Snapshot: **2026-11-08**. This document captures the original product specification, follow-up decisions, research performed in the previous ChatGPT conversation, verified repository state, engineering preferences, uncertainties, and the work still outstanding. It is a *context handoff*, not evidence that a proposed feature works in the game.
+> Infrastructure follow-up: **2026-11-10**, see section 16. Earlier repository/CI snapshots below are historical.
 >
 > **Repository:** https://github.com/nick-sidorin/azeroth-fitness  
 > **Target game:** **World of Warcraft: Forever** (not generic Retail/Classic; verify compatibility against Forever specifically).  
@@ -444,3 +445,18 @@ These are **preferences/requirements to implement and verify**, not evidence the
 - **CI package workflow:** ../.github/workflows/release.yml
 
 This file is intended to preserve the full product and decision context when moving from an ordinary ChatGPT conversation into a new Codex conversation. It should evolve as **decisions are actually made**: mark proposals separately from validated behavior, update the status after tests/releases, and avoid rewriting historical facts.
+
+## 16. Build and release process alignment — 2026-11-10
+
+The owner requested the same build/release process as `nick-sidorin/no-quest-hints-forever` and a preview of the current addon. The owner will copy repository settings manually. This request does not include a public release or runtime fixes.
+
+Implemented in source:
+
+- `release.yml`: PR checks named `build`, manual previews, tag builds and tag releases; ordinary main pushes do not run build CI. PR updates cancel superseded runs. Preview artifacts contain the addon folder directly, not a nested ZIP.
+- `scripts/run_ci.sh`: shared Lua 5.1 parser, discovered mocked regression suites, TOC integrity and Python packaging tests. `scripts/package_addon.py`: deterministic TOC-plus-LICENSE archive with exact source-byte verification. Root runtime files retain their original layout in Git; archives use `AzerothFitness/`.
+- `publish.yml`: explicit version request on main, full repeated CI, version/changelog/tag gates, annotated tag and GitHub Release. Stable and alpha/beta requests follow the reference process. `.github/release-request.txt` is `none`, preventing publication when this infrastructure is installed.
+- `.pkgmeta` and `CURSEFORGE_DESCRIPTION.md`: preparation for native CurseForge source packaging and manually maintained listing copy. No CurseForge connection or publication has been verified.
+
+Local validation: Lua 5.1 parsing and three mocked accounting/motion/jump suites passed, along with nine packaging tests. These tests establish selected code behavior, not Forever compatibility. Check the live PR/Actions result for remote validation and merge state.
+
+Addon runtime remains the experimental 0.1.0 baseline, with schema 1 unchanged. No live Forever QA or public release was performed for this infrastructure change. The earlier audit's state-transition, unavailable-speed and incomplete-ledger concerns remain follow-up work. Next priorities remain measurement correctness, persistence robustness and in-client diagnostics before UI polish.
