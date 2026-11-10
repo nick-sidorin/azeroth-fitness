@@ -29,6 +29,12 @@ This records the owner's current design choices. This repository vendors the sam
 - Host the existing settings form in the native AddOns canvas category when its APIs are available; keep that same form embedded only as a capability fallback. Refresh from live SavedVariables on native show/refresh, preserve unsaved edits on repeated opens and never duplicate saved settings state. Native settings also contain the final copyable Issues-link action.
 - Create the dashboard refresh ticker on show and cancel it on hide. Native settings are static until the user acts; they need no activity polling.
 
+## Achievement view
+
+The award-icon sidebar tab replaces Records. Use Blizzard achievement parchment (colored/desaturated), native icon frames, title strips and point shields on addon-owned rows. A native `MinimalScrollBar` controls a clipped engine `ScrollFrame`; keep its thumb, track and arrow behavior. Earned rows sort first, then stable definition order. Each award gives 10 points. Put best day, step streak and lifetime totals in History above the chart.
+
+Newly earned awards queue a noninteractive alert using native achievement atlases at 30% of UIParent height above the bottom. Animate only while a notification is active; clear pending alerts on a confirmed testing reset. Do not use Blizzard achievement IDs or insert addon entries into native alert pools. No progress notifications.
+
 ## Verification boundary
 
 Lua mocks check widget choices, inherited callback preservation, press/release behavior, opaque backing, optional-atlas fallback, sidebar-aware fitting, state changes, locale completeness and number/goal behavior. They cannot prove constructor permission, artwork appearance, glyph coverage or translated line fit. See [the source/API mapping](NATIVE_UI_RESEARCH.md). Give the owner a single installation-ready preview ZIP and collect a real-client screenshot before merging this visual iteration. No public release is implied.

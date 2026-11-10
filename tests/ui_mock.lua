@@ -2,6 +2,7 @@
 local Mock = { objects = {}, tickers = {} }
 local Methods = {}
 local function object(kind, name, parent, template)
+  assert(template ~= "VerticalScrollBarTemplate", "Base scrollbar template has no track/thumb children")
   local result = setmetatable({ kind = kind, name = name, parent = parent, template = template,
     shown = true, scripts = {}, points = {}, width = 0, height = 0, level = 1, scale = 1 }, { __index = Methods })
   Mock.objects[#Mock.objects + 1] = result
@@ -39,6 +40,21 @@ local function object(kind, name, parent, template)
   end
   return result
 end
+function Methods:SetScrollChild(child) self.scrollChild = child end
+function Methods:SetVerticalScroll(value) self.verticalScroll = value end
+function Methods:GetVerticalScroll() return self.verticalScroll or 0 end
+function Methods:EnableMouseWheel(value) self.mouseWheel = value end
+function Methods:RegisterCallback(event, callback, owner)
+  self.callbacks = self.callbacks or {}; self.callbacks[event] = { callback, owner }
+end
+function Methods:Init(visible, pan) self.visibleExtent, self.panExtent = visible, pan; self.percentage = 0 end
+function Methods:SetScrollPercentage(value)
+  self.percentage = value
+  local cb = self.callbacks and self.callbacks.OnScroll
+  if cb then cb[1](cb[2], value) end
+end
+function Methods:SetDesaturated(value) self.desaturated = value end
+function Methods:SetAlpha(value) self.alpha = value end
 function Methods:SetSize(w, h) self.width, self.height = w, h end
 function Methods:SetWidth(w) self.width = w end
 function Methods:SetHeight(h) self.height = h end

@@ -41,3 +41,9 @@ mounted, swimming = false, true
 hook()
 assert(not watcher.shown)
 print("PASS: jump confirmation, airborne repeat suppression, timeout and mounted/swimming exclusions")
+now, falling, swimming = 3, false, false
+hook()
+AF.Jump.Reset()
+now, falling = 3.1, true
+watcher.scripts.OnUpdate()
+assert(count == 1 and not watcher.shown, "Reset must discard the pending pre-reset jump")

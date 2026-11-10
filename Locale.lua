@@ -3,6 +3,18 @@ AF.NAME = "Azeroth Fitness"
 AF.locale = type(GetLocale) == "function" and GetLocale() or "enUS"
 AF.locales = {}
 AF.locales.enUS = {
+  ACHIEVEMENTS = "Achievements",
+  ACHIEVEMENT_POINTS = "Achievement points: %d / %d",
+  EARNED_DATE = "Earned: %s",
+  NOT_EARNED = "Not yet earned",
+  AWARD_firstSteps = "First Steps",
+  AWARD_DESC_firstSteps = "50 lifetime estimated steps",
+  TOAST_TITLE = "Achievement earned",
+  RESET_CONFIRM = "Erase all activity history, totals and achievements for %s? Settings and other characters will be kept. This cannot be undone.",
+  RESET_ACCEPT = "Erase statistics",
+  RESET_CANCEL = "Cancel",
+  RESET_DONE = "Statistics reset for %s.",
+  RESET_UNAVAILABLE = "Reset unavailable: confirmation dialog could not be opened.",
   TODAY = "Today",
   HISTORY = "History",
   RECORDS = "Records",
@@ -64,6 +76,18 @@ AF.locales.enUS = {
   SETTINGS_UNAVAILABLE = "Native AddOns settings are unavailable in this client.",
 }
 AF.locales.ruRU = {
+  ACHIEVEMENTS = "Достижения",
+  ACHIEVEMENT_POINTS = "Очки достижений: %d / %d",
+  EARNED_DATE = "Получено: %s",
+  NOT_EARNED = "Ещё не получено",
+  AWARD_firstSteps = "Первые шаги",
+  AWARD_DESC_firstSteps = "50 расчётных шагов за всё время",
+  TOAST_TITLE = "Получено достижение",
+  RESET_CONFIRM = "Удалить всю историю активности, итоги и достижения персонажа %s? Настройки и другие персонажи сохранятся. Отменить удаление нельзя.",
+  RESET_ACCEPT = "Удалить статистику",
+  RESET_CANCEL = "Отмена",
+  RESET_DONE = "Статистика персонажа %s обнулена.",
+  RESET_UNAVAILABLE = "Сброс недоступен: не удалось открыть окно подтверждения.",
   TODAY = "Сегодня",
   HISTORY = "История",
   RECORDS = "Рекорды",
@@ -128,7 +152,7 @@ AF.locales.enGB = AF.locales.enUS
 
 function AF:T(key)
   if key == "TITLE" then return self.NAME end
-  if key == "HELP" then return "/af, /af stats, /af settings, /af history, /af debug" end
+  if key == "HELP" then return "/af, /af stats, /af settings, /af history, /af debug, /af reset" end
   local strings = self.locales[self.locale] or self.locales.enUS
   return strings[key] or self.locales.enUS[key] or key
 end

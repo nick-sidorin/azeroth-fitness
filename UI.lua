@@ -120,9 +120,9 @@ function UI:Build()
   self.tabs, self.pages = {}, {}
   self.sideWidth = 0
   local icons = { today = AF.ACTIVITY_ICON, history = "Interface\\Icons\\INV_Misc_Book_09",
-    records = "Interface\\Icons\\INV_Misc_Coin_01", settings = "Interface\\Icons\\Trade_Engineering" }
+    achievements = AF.ACHIEVEMENT_ICON, settings = "Interface\\Icons\\Trade_Engineering" }
   local previousTab
-  for _, id in ipairs({ "today", "history", "records", "settings" }) do
+  for _, id in ipairs({ "today", "history", "achievements", "settings" }) do
     local tab = CreateFrame("Frame", nil, window, "LargeSideTabButtonTemplate")
     tab:EnableMouse(true)
     if previousTab then tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -2)
@@ -144,7 +144,7 @@ function UI:Build()
   end
   self:BuildToday()
   self:BuildHistory()
-  self:BuildRecords()
+  AF.Achievements:Build(self.pages.achievements)
   self:BuildSettings()
   window:HookScript("OnShow", function() UI:Fit(); UI:StartRefresh() end)
   window:HookScript("OnHide", function() UI:StopRefresh() end)
@@ -178,14 +178,18 @@ end
 
 function UI:BuildHistory()
   local page = self.pages.history
-  self.week = button(page, AF:T("WEEK"), 0, -4, 126, 26, function() UI.range = 7; UI:Refresh() end)
-  self.month = button(page, AF:T("MONTH"), 134, -4, 126, 26, function() UI.range = 30; UI:Refresh() end)
-  self.historySummary = line(page, 10, -50, 540, "", 17, C.gold)
-  local chart = panel(page, 0, -90, 560, 300)
+  local summary = panel(page, 0, -4, 560, 116)
+  self.best = line(summary, 15, -16, 530, "", 16, C.gold)
+  self.streak = line(summary, 15, -51, 530, "", 16, C.steps)
+  self.lifetime = line(summary, 15, -86, 530, "", 12, C.muted)
+  self.week = button(page, AF:T("WEEK"), 0, -132, 126, 26, function() UI.range = 7; UI:Refresh() end)
+  self.month = button(page, AF:T("MONTH"), 134, -132, 126, 26, function() UI.range = 30; UI:Refresh() end)
+  self.historySummary = line(page, 10, -170, 540, "", 17, C.gold)
+  local chart = panel(page, 0, -206, 560, 230)
   self.historyBars = {}
   for i = 1, 30 do
     local b = CreateFrame("Frame", nil, chart)
-    b:SetSize(12, 235)
+    b:SetSize(12, 170)
     local fill = b:CreateTexture(nil, "ARTWORK")
     fill:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
     fill:SetVertexColor(unpack(C.steps))
@@ -195,24 +199,8 @@ function UI:BuildHistory()
     b.fill, b.label = fill, label
     self.historyBars[i] = b
   end
-  self.historyFootnote = line(page, 10, -409, 540, AF:T("LOCAL_DATE"), 12, C.muted)
-  self.historyDates = line(page, 10, -446, 540, "", 13)
-end
-
-function UI:BuildRecords()
-  local page = self.pages.records
-  local summary = panel(page, 0, -4, 560, 116)
-  self.best = line(summary, 15, -16, 530, "", 16, C.gold)
-  self.streak = line(summary, 15, -51, 530, "", 16, C.steps)
-  self.lifetime = line(summary, 15, -86, 530, "", 12, C.muted)
-  local awards = panel(page, 0, -132, 560, 360)
-  self.achievementTitle = line(awards, 15, -13, 530, AF:T("ACHIEVEMENTS"), 16, C.gold)
-  self.awards = {}
-  for i = 1, #AF.ACHIEVEMENTS do
-    local label = line(awards, 15, -43 - (i - 1) * 44, 530, "", 12, C.muted)
-    label:SetHeight(38)
-    self.awards[i] = label
-  end
+  self.historyFootnote = line(page, 10, -449, 540, AF:T("LOCAL_DATE"), 12, C.muted)
+  self.historyDates = line(page, 10, -479, 540, "", 13)
 end
 
 local function edit(parent, x, y, initial)
@@ -340,12 +328,18 @@ function UI:Refresh()
   self.accuracy:SetText(string.format(AF:T("COVERAGE"),
     coverage > 0 and (today.coverage.position or 0) / coverage * 100 or 0))
 
-  -- Only update the chart/records while their page is selected.
+  -- Only update history/achievements while their page is selected.
   if self.page == "history" then self:RefreshHistory(today.goal) end
-  if self.page == "records" then self:RefreshRecords() end
+  if self.page == "achievements" then AF.Achievements:Refresh() end
 end
 
 function UI:RefreshHistory(goal)
+  local bestKey, steps = AF:BestDay()
+  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(steps) .. (bestKey and " (" .. bestKey .. ")" or ""))
+  self.streak:SetText(AF:T("STREAK") .. ": " .. AF:Streak() .. " " .. AF:T("DAYS"))
+  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps) .. " " .. AF:T("STEPS")
+    .. " | " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
+
   local range = self.range or 7
   local total = AF:Aggregate(range)
   self.historySummary:SetText(AF:FormatNumber(total.steps) .. " " .. AF:T("STEPS")
@@ -365,27 +359,13 @@ function UI:RefreshHistory(goal)
       b:ClearAllPoints()
       b:SetPoint("BOTTOMLEFT", b:GetParent(), "BOTTOMLEFT", 15 + (i - 1) * (width + gap), 35)
       b.fill:SetWidth(width)
-      b.fill:SetHeight(math.max(0.1, 235 * steps / maximum))
+      b.fill:SetHeight(math.max(0.1, 170 * steps / maximum))
       b.label:SetText(range == 7 and AF:DayKey(offset):sub(6) or
         ((i == 1 or i == range or i % 5 == 0) and AF:DayKey(offset):sub(9) or ""))
       b:Show()
     else b:Hide() end
   end
   self.historyDates:SetText(AF:DayKey(range - 1) .. " - " .. AF:DayKey())
-end
-
-function UI:RefreshRecords()
-  local bestKey, steps = AF:BestDay()
-  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(steps) .. (bestKey and " (" .. bestKey .. ")" or ""))
-  self.streak:SetText(AF:T("STREAK") .. ": " .. AF:Streak() .. " " .. AF:T("DAYS"))
-  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps) .. " " .. AF:T("STEPS")
-    .. " | " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
-  for i, award in ipairs(AF.ACHIEVEMENTS) do
-    local won = AF.char.achievements[award.id]
-    local name, description = AF:T("AWARD_" .. award.id), AF:T("AWARD_DESC_" .. award.id)
-    self.awards[i]:SetText(name .. "\n" .. description)
-    color(self.awards[i], won and C.gold or C.muted)
-  end
 end
 
 function UI:Show(page)

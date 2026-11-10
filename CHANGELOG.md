@@ -4,6 +4,9 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Eight 10-point addon achievements, including First Steps at 50 estimated steps; native parchment cards, desaturated locked state and earned-first scrolling list
+- Queued achievement-earned notifications independent of dashboard visibility, with native alert artwork
+- Temporary `/af reset` testing command with current-character-only native confirmation; preserve settings and other characters
 - Pinned shared addon-development standards, offline integrity gate and reviewed sync/update procedure
 - Native AddOns settings category sharing one live form with the fallback, plus a localized copyable Issues link
 - Complete dictionaries for all 12 official WoW client locales with automatic game-language selection and English fallback
@@ -21,6 +24,7 @@ Versions follow Semantic Versioning.
 - CurseForge source-packager configuration and reusable listing description
 
 ### Changed
+- Rename Records to Achievements with an award icon; move best day, step-goal streak and lifetime totals to History
 - Keep the Azeroth Fitness brand untranslated in every locale and remove language-selection buttons
 - Localize number separators/distance units and accept decimal commas in stride input
 

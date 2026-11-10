@@ -40,3 +40,13 @@ The client XML defines which elements a template actually creates; Lua mixins de
 Only addon-owned frames and shared native artwork are used. The implementation does not open or modify Blizzard's character/professions windows, call profession casting/selection methods, copy gameplay mixins, register gamepad focus handlers or inherit `GamepadSecureBaseDialogTemplate`. Native art is referenced from the client; no extracted textures or Blizzard source files are shipped.
 
 Optional background atlases are checked before use. If absent, the native rock/marble backgrounds remain, with an opaque backing. Side-tab art keeps the template's own geometry. Mock tests cover callback preservation, inside/outside release, selected states, missing optional backgrounds and fitting that includes the protruding sidebar. Source/template existence and passing mocks still require a Forever client check for actual construction, appearance and interaction. No controller support or universal taint safety is claimed.
+
+## Achievement cards and alerts — 2026-11-10
+
+Reference: matching `forever` branch of [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source/tree/forever). Inspected the following authored resources and callback contracts:
+
+- `Blizzard_AchievementUI/Mainline/Blizzard_AchievementUI.xml` and `.lua`: `UI-Achievement-Parchment-Horizontal` and its `-Desaturated` variant, `UI-Achievement-Borders` earned/locked title UVs, `UI-Achievement-IconFrame` and `UI-Achievement-Shields`. Use the parchment bottom crop for compact 104-unit rows.
+- `Blizzard_FrameXML/Mainline/AlertFrames.xml`, `AlertFrames.lua` and `AlertFrameSystems.xml`: `ui-achievement-alert-background`, `ui-achievement-iconframe` and `ui-achievement-shield-1`; 300 x 101 alert geometry. Use checked atlases at authored sizes and known parchment/icon/shield file fallback.
+- `Blizzard_SharedXML/Shared/Scroll/{ScrollBar.xml,ScrollTemplates.xml,MinimalScrollBar.xml,ScrollBar.lua}`: `VerticalScrollBarTemplate` is an incomplete base with no track/thumb, so instantiate the complete `MinimalScrollBar`. `Init(visibleExtentPercentage, panExtentPercentage)` and `RegisterCallback("OnScroll", callback, owner)` map its native controls to the engine ScrollFrame offset. Mouse wheel uses the same percentage setter.
+
+Native `AchievementTemplate` and `AchievementAlertFrameTemplate` depend on real Blizzard achievement IDs, load-on-demand data and shared alert infrastructure. The addon therefore uses ordinary frames with these native textures and its own SavedVariables; it does not load Blizzard_AchievementUI, fabricate game achievement IDs, change global alert pools or award real character achievement points. This is source evidence, not a claim of in-client rendering or taint validation.

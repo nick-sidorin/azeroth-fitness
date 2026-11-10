@@ -13,7 +13,7 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 - 7-day and 30-day history charts
 - Walking, running, backpedaling, left/right strafing and swimming distances
 - Jumps and fictional Murlocalories
-- Seven humorous achievements
+- Eight humorous achievements with points, scrollable native-style cards and earned-first sorting
 - All 12 official WoW client locales, selected automatically from the game language
 - Native portrait-frame dashboard with right-side icon tabs, horizontal activity bars and client fonts
 - Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
@@ -33,6 +33,7 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 - /af history — daily chart
 - /af settings — daily goals, stride and minimap visibility
 - /af debug — last motion mode / measurement source
+- /af reset — temporary testing command; confirm erasing the current character’s activity history, totals and achievements (keeps settings and other characters)
 
 ## Dashboard and daily goals
 
@@ -47,6 +48,12 @@ Settings register under **Options → AddOns → Azeroth Fitness** when the nati
 **Azeroth Fitness** is the brand in every language and is never translated. The interface follows `GetLocale()` without a language selector or SavedVariables override. Supported client locales: `enUS`, `enGB`, `ruRU`, `deDE`, `frFR`, `esES`, `esMX`, `itIT`, `ptBR`, `koKR`, `zhCN`, `zhTW`. English and Spanish variants share translations; English is the fallback for unknown locales or missing keys. Numbers and distance units follow the client locale. The localization structure follows No Quest Hints Forever.
 
 Native component use and mock tests do not establish the final appearance in every Forever build. Please check translated text, joke wording, frame sizing, minimap positioning and different UI scales in game. Dictionary completeness is tested; native-speaker and client layout reviews remain useful.
+
+## Achievements
+
+The award-icon tab contains only achievements: eight cards worth 10 points each, with earned cards first and locked cards desaturated. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
+
+**First Steps** unlocks after 50 estimated lifetime steps. Newly earned achievements display a queued Blizzard-style notification at the lower center of the screen, even when the dashboard is closed. These are addon achievements, separate from Blizzard character achievement points. There are no partial-progress notifications. For testing, `/af reset` opens a native confirmation before deleting this character’s statistics; Cancel/Escape or unavailable confirmation leaves them intact.
 
 ## Measurement integrity
 
@@ -64,7 +71,7 @@ Data is saved locally as AzerothFitnessDB via the WoW SavedVariables system, key
 
 ## Forever compatibility
 
-Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The current portrait-frame redesign and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
+Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The owner approved the portrait-frame preview for merging. The new achievement cards, notifications and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
 
 ## Research and credits
 

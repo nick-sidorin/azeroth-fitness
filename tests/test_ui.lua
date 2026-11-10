@@ -5,7 +5,7 @@ UnitGUID = function() return "Player-UI" end
 UnitName = function() return "Test" end
 UnitRace = function() return "Human", "Human" end
 local AF = {}
-for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Minimap.lua", "UI.lua" }) do
+for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "UI.lua" }) do
   assert(loadfile(file))("AzerothFitness", AF)
 end
 AF:Init()
@@ -91,10 +91,11 @@ assert(ui.historyBars[7]:IsShown() and not ui.historyBars[8]:IsShown())
 ui.range = 30
 ui:Refresh()
 assert(ui.historyBars[30]:IsShown() and #ui.historyBars[1].points == 1)
-ui:Show("records")
-assert(not ui.awards[1]:GetText():find("AWARD_", 1, true))
-ui:Refresh()
-assert(ui.awards[1]:GetText():find("Потрогай траву", 1, true))
+ui:Show("achievements")
+assert(AF.Achievements.rows[1].title:GetText() == "Первые шаги")
+assert(ui.tabs.achievements.tooltipText == "Достижения")
+assert(ui.tabs.achievements.Icon.texture == AF.ACHIEVEMENT_ICON)
+assert(ui.best:GetParent() == ui.streak:GetParent() and ui.best:GetParent():GetParent() == ui.pages.history)
 
 UIParent:SetSize(800, 600)
 ui:Fit()

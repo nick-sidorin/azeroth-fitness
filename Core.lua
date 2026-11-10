@@ -157,6 +157,7 @@ function AF:Aggregate(lastDays)
 end
 
 AF.ACHIEVEMENTS = {
+  { id = "firstSteps", name = "First Steps", desc = "50 estimated steps", value = function(a) return a.char.total.steps >= 50 end },
   { id = "touchGrass", name = "Touch Grass", desc = "10,000 lifetime steps", value = function(a) return a.char.total.steps >= 10000 end },
   { id = "stillSitting", name = "Still Sitting", desc = "50,000 steps in one day", value = function(a) local _, n = a:BestDay(); return n >= 50000 end },
   { id = "backpedal", name = "Backpedal Champion", desc = "1,000 yards backward", value = function(a) return (a.char.total.yards.back or 0) >= 1000 end },
@@ -169,6 +170,40 @@ AF.ACHIEVEMENTS = {
   { id = "couch", name = "Professional Couch Adventurer", desc = "7-day goal streak", value = function(a) return a:Streak() >= 7 end },
 }
 
+local awardIcons = {
+  firstSteps = "Ability_Rogue_Sprint", touchGrass = "INV_Misc_Herb_01",
+  stillSitting = "INV_Misc_Book_09", backpedal = "Ability_Rogue_Feint",
+  crabMode = "INV_Misc_Fish_14", jumpAddict = "Ability_Kick",
+  marathon = "Achievement_Explore_EasternKingdoms", couch = "Achievement_Level_10",
+}
+for _, award in ipairs(AF.ACHIEVEMENTS) do
+  award.points = 10
+  award.icon = "Interface\\Icons\\" .. awardIcons[award.id]
+end
+AF.ACHIEVEMENT_ICON = "Interface\\Icons\\Achievement_Level_10"
+
+function AF:GetAchievementList()
+  local result = {}
+  for index, award in ipairs(self.ACHIEVEMENTS) do
+    local earned = self.char and self.char.achievements[award.id]
+    result[#result + 1] = { award = award, earned = not not earned, date = earned, order = index }
+  end
+  table.sort(result, function(a, b)
+    if a.earned ~= b.earned then return a.earned end
+    return a.order < b.order
+  end)
+  return result
+end
+
+function AF:GetAchievementPoints()
+  local earned, available = 0, 0
+  for _, award in ipairs(self.ACHIEVEMENTS) do
+    available = available + award.points
+    if self.char and self.char.achievements[award.id] then earned = earned + award.points end
+  end
+  return earned, available
+end
+
 function AF:CheckAchievements()
   if not self.char then return end
   self.char.achievements = self.char.achievements or {}
@@ -176,8 +211,20 @@ function AF:CheckAchievements()
     if not self.char.achievements[award.id] and award.value(self) then
       self.char.achievements[award.id] = self:DayKey()
       self:Say(string.format(self:T("AWARD_UNLOCKED"), self:T("AWARD_" .. award.id)))
+      if self.Achievements then self.Achievements:Earned(award) end
     end
   end
+end
+
+-- Temporary character-only testing reset. The slash entry requests confirmation.
+function AF:ResetStatistics()
+  if not self.char then return end
+  self.char.days, self.char.total, self.char.achievements = {}, self:NewLedger(), {}
+  self:Today()
+  if self.Motion and self.Motion.Reset then self.Motion.Reset() end
+  if self.Jump and self.Jump.Reset then self.Jump.Reset() end
+  if self.Achievements then self.Achievements:Clear() end
+  if self.UI then self.UI:Refresh() end
 end
 
 function AF:Say(message)
