@@ -4,6 +4,7 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Pinned shared addon-development standards, offline integrity gate and reviewed sync/update procedure
 - PR and manual preview builds using the `build` check, matching the No Quest Hints Forever workflow
 - Shared Lua 5.1 syntax and mocked regression gates for accounting, motion and jump logic
 - TOC-derived reproducible ZIP packaging with archive regression tests and direct-install test artifacts

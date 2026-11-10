@@ -460,3 +460,9 @@ Implemented in source:
 Local validation: Lua 5.1 parsing and three mocked accounting/motion/jump suites passed, along with nine packaging tests. These tests establish selected code behavior, not Forever compatibility. Check the live PR/Actions result for remote validation and merge state.
 
 Addon runtime remains the experimental 0.1.0 baseline, with schema 1 unchanged. No live Forever QA or public release was performed for this infrastructure change. The earlier audit's state-transition, unavailable-speed and incomplete-ledger concerns remain follow-up work. Next priorities remain measurement correctness, persistence robustness and in-client diagnostics before UI polish.
+
+## Shared standards adoption — 2026-11-10
+
+The owner requested the same pinned development dependency as No Quest Hints Forever. Reviewed `nick-sidorin/wow-addon-standards` 0.1.0 at `f36540efe61eb90671be1359849cbc6d2ddd85c1`, then used its reviewed sync tool to copy shared instructions/field notes and produce the SHA-256 lock. Root instructions explicitly require reading the local copy. The shared CI/publisher gate verifies it offline; tests reject modified documents, wrong origin/inventory and moving refs. All files stay outside installable runtime/CurseForge packages.
+
+This adoption PR changes no Lua runtime, TOC version or release request. `docs/STANDARDS_ALIGNMENT.md` distinguishes main, pending PR #3 runtime corrections, conditional rules and release-time gates. The UI PR must integrate this adoption and rerun combined checks; it remains subject to native-window QA. Current runtime has no XML or bundled art, so XML packaging is rejected until a recursive include/script and asset-inventory gate is introduced. The actual CurseForge project/public/editor URLs are not configured; do not invent another addon's identifiers.

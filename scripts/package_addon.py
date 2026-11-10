@@ -56,6 +56,8 @@ def manifest() -> tuple[str, list[str]]:
             raise ValueError(f"Unsafe TOC entry: {line!r}")
         if part.suffix.lower() not in {".lua", ".xml"}:
             raise ValueError(f"Unsupported runtime entry: {line!r}")
+        if part.suffix.lower() == ".xml":
+            raise ValueError("XML requires a recursive include/script and asset-inventory gate before packaging")
         relative = f"AzerothFitness/{part.as_posix()}"
         if relative in listed:
             raise ValueError(f"Repeated TOC entry: {relative}")
