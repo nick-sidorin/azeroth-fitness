@@ -187,13 +187,21 @@ end
 function AF:FormatNumber(n)
   local s = tostring(floor((n or 0) + 0.5))
   local sign, body = s:match("^(%-?)(%d+)$")
-  return sign .. body:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+  local separator = self:GetNumberSeparators()
+  local grouped = body:reverse():gsub("(%d%d%d)", "%1~"):reverse():gsub("^~", "")
+  return sign .. grouped:gsub("~", separator)
+end
+
+function AF:FormatDecimal(value, places)
+  local _, decimal = self:GetNumberSeparators()
+  local formatted = string.format("%." .. places .. "f", value)
+  return (formatted:gsub("%.", decimal))
 end
 
 function AF:FormatDistance(yards)
   local meters = (yards or 0) * self.METERS_PER_YARD
-  if meters < 1000 then return self:FormatNumber(meters) .. " m" end
-  return string.format("%.2f km", meters / 1000)
+  if meters < 1000 then return self:FormatNumber(meters) .. " " .. self:T("METERS") end
+  return self:FormatDecimal(meters / 1000, 2) .. " " .. self:T("KILOMETERS")
 end
 
 function AF:Init()
@@ -201,7 +209,6 @@ function AF:Init()
   local db = AzerothFitnessDB
   db.schema = db.schema or self.SCHEMA
   db.characters = db.characters or {}
-  db.language = db.language or "auto"
   db.showMinimap = db.showMinimap ~= false
   self.db = db
 end

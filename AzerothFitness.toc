@@ -1,15 +1,24 @@
 ## Interface: 16001
 ## AllowLoadGameType: camelot
 ## Title: Azeroth Fitness
-## Title-ruRU: Фитнес Азерота
 ## IconTexture: Interface\Icons\Ability_Rogue_Sprint
 ## Notes: A very serious fitness tracker for a very sedentary adventurer.
 ## Notes-ruRU: Очень серьёзный фитнес-трекер для сидячего героя.
+## Notes-deDE: Ein sehr ernster Fitnesstracker für sitzende Abenteurer.
+## Notes-frFR: Un suivi sportif très sérieux pour aventuriers sédentaires.
+## Notes-esES: Un registro de actividad muy serio para aventureros sedentarios.
+## Notes-esMX: Un registro de actividad muy serio para aventureros sedentarios.
+## Notes-itIT: Un serissimo registro di attività per avventurieri sedentari.
+## Notes-ptBR: Um rastreador de atividade muito sério para aventureiros sedentários.
+## Notes-koKR: 앉아 있는 모험가를 위한 매우 진지한 활동 추적기입니다.
+## Notes-zhCN: 为久坐冒险者打造的严肃健身记录器。
+## Notes-zhTW: 為久坐冒險者打造的嚴肅健身記錄器。
 ## Author: nick-sidorin
 ## Version: 0.1.0
 ## SavedVariables: AzerothFitnessDB
 
 Locale.lua
+LocaleTranslations.lua
 Core.lua
 Motion.lua
 Jump.lua

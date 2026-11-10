@@ -475,3 +475,15 @@ Implemented in the preview branch (verify the live PR/Actions for its current st
 Validation: the shared Lua 5.1 gate includes new UI-interaction, minimap-drag and additive goal-upgrade tests, alongside prior movement/accounting and ZIP tests. Mocks cannot verify appearance, Russian glyph rendering, texture availability or client interaction. Hand over the PR's single installable ZIP for owner QA before merging this UI change. No release, tag or version bump is requested.
 
 Client checklist: install preview and `/reload`; ruRU text without boxes; EN/RU switching; all four tabs; saving each goal and invalid input; yesterday's records unchanged; Escape/close/header drag; circular shortcut, four drag quadrants, reload and minimap/UI scale changes; hide/re-show shortcut via `/af settings`; no window toggle on drag release. Confirm the style against the supplied Overlord reference. Rings and original custom decorative artwork remain later design iterations.
+
+## 18. Brand, automatic localization and textured ledger — 2026-11-10
+
+Owner feedback on the #3 preview confirms that the Russian labels are now readable in the supplied client screenshot and that the direction is promising. The screenshot also shows the game world through the main window and activity panels. The owner requested a visible texture instead of translucency and a more polished Overlord-inspired design. This is feedback on the supplied scenario, not blanket approval of all UI or measurement behavior.
+
+Decisions superseding earlier language/design notes:
+
+- The brand is **Azeroth Fitness** in all locales, not a translated Russian name. No translated TOC title, minimap label or window title.
+- Language comes from `GetLocale()` only. Remove the language buttons and ignore legacy `db.language`. Support all 12 official WoW locales with complete dictionaries, shared enUS/enGB and esES/esMX translations, and English fallback. Use the neighboring No Quest Hints Forever project as the engineering reference. The owner plans a shared guideline there; do not treat it as already available or copy unrelated gameplay policies.
+- Use a genuinely opaque base with tiled native marble, muted gold/brass framing, a framed emblem header, real Blizzard top tabs and distinct typography for current values and targets. See `docs/UI_DESIGN.md`. Do not copy Overlord/Apple art. Rings remain deferred.
+
+Implemented in the updated #3 branch: `LocaleTranslations.lua` loads second, before consumers; complete translation/placeholder/brand checks; localized numeric separators/units; decimal-comma stride input; opaque surfaces and native tabs. The screenshot's 29-jumps/28% rounding error is also covered by a focused regression. Existing activity/goal schema stays compatible. No release, merge approval or universal client validation is implied. Check the latest PR head and Actions artifact rather than reusing the earlier build link.

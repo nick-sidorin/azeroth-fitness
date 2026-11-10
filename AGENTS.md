@@ -13,7 +13,8 @@ This is the repository for **Azeroth Fitness**, a humorous but technically serio
 
 - Talk with the maintainer in **Russian**.
 - Write code, comments, repository Markdown, commits, pull requests, changelog and release notes in **English**.
-- Support **ruRU and enUS** user-facing addon locale.
+- Keep **Azeroth Fitness** untranslated in every locale. Follow `GetLocale()` automatically; do not add language-selection controls or honor legacy `db.language` overrides.
+- Support all official client locales: **enUS, enGB, ruRU, deDE, frFR, esES, esMX, itIT, ptBR, koKR, zhCN, zhTW**, with English fallback. Follow the neighboring No Quest Hints Forever patterns where applicable; new shared guidance from the owner can refine these conventions.
 - Use **feature branch -> pull request -> squash merge**; never push directly to main.
 - Add meaningful automated Lua 5.1 parsing, tests and archive checks; require green checks before merges where branch settings permit.
 - Keep README, changelog, relevant decisions and release descriptions synchronized with real changes. Prefer concise comments and uncluttered UI.
@@ -31,6 +32,8 @@ The existing **v0.1.0** code is an unverified experimental baseline. First inspe
 ## Maintaining context
 
 Update docs/PROJECT_CONTEXT.md when a major technical/product decision is validated. Clearly separate **requested**, **implemented in source**, **verified in game**, and **released** status so a future Codex session can continue without relying on chat memory.
+
+For interface work, read [docs/UI_DESIGN.md](docs/UI_DESIGN.md). Use opaque textured native surfaces and original client controls; do not copy the Overlord reference's artwork or introduce secure/glue templates on the assumption that template registration permits addon use.
 
 ## Build and release workflow
 

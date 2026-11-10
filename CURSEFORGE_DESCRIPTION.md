@@ -16,13 +16,13 @@ An experimental fitness tracker for WoW: Forever: estimated steps, daily goals, 
 - Browse 7-day and 30-day activity charts, lifetime totals, best day and goal streak.
 - Track walking, running, backpedaling, strafing, swimming and jumps.
 - Earn seven playful achievements and burn entirely fictional Murlocalories.
-- Use the gold-framed dashboard in English or Russian, with horizontal progress bars, a draggable round minimap shortcut and `/af` commands.
+- Use the textured, gold-framed dashboard in your game's language, with horizontal progress bars, a draggable round minimap shortcut and `/af` commands.
 
 **Experimental v0.1.0: validation in WoW: Forever is still required.** Steps are distance-based estimates, not observed animation footfalls. Default stride lengths are coarse estimates; jump detection and travel classification have known limitations. Murlocalories have no relationship to real calories or health measurements.
 
 Activity is stored locally per character and local calendar day using WoW SavedVariables. The addon requires no external program or service.
 
-Use `/af` to open the dashboard, `/af history` for charts and `/af settings` for the goal, stride and language.
+Use `/af` to open the dashboard, `/af history` for charts and `/af settings` for daily goals, stride and minimap visibility. The interface automatically follows the game language across all 12 official WoW locales, with English fallback. The name Azeroth Fitness stays the same in every language.
 
 **[Report a Bug or Suggest a Feature](https://github.com/nick-sidorin/azeroth-fitness/issues)** — click **New issue** for either a problem or an idea. For bugs, include your Forever/addon version and reproduction steps.
 

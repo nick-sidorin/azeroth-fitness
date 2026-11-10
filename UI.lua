@@ -4,7 +4,7 @@ AF.UI = UI
 
 local W, H = 600, 650
 local C = {
-  gold = { 1, 0.82, 0 }, white = { 1, 1, 1 }, muted = { 0.68, 0.65, 0.58 },
+  gold = { 0.93, 0.78, 0.47 }, white = { 0.96, 0.92, 0.83 }, muted = { 0.67, 0.63, 0.53 },
   steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 },
 }
 local function color(fs, c) fs:SetTextColor(c[1], c[2], c[3]) end
@@ -24,15 +24,29 @@ local function line(parent, x, y, width, value, size, tint)
   fs:SetWidth(width)
   return fs
 end
+local function stone(parent, width, height, shade)
+  -- The dialog background has transparent pixels. Guarantee opacity separately.
+  local base = parent:CreateTexture(nil, "BACKGROUND", nil, -2)
+  base:SetPoint("TOPLEFT", 5, -5)
+  base:SetPoint("BOTTOMRIGHT", -5, 5)
+  base:SetColorTexture(0.055, 0.042, 0.028, 1)
+  local grain = parent:CreateTexture(nil, "BACKGROUND", nil, -1)
+  grain:SetAllPoints(base)
+  grain:SetTexture("Interface\\FrameGeneral\\UI-Background-Marble")
+  grain:SetHorizTile(true)
+  grain:SetVertTile(true)
+  grain:SetTexCoord(0, width / 256, 0, height / 256)
+  grain:SetVertexColor(shade, shade * 0.83, shade * 0.62, 1)
+  parent.surface, parent.grain = base, grain
+end
 local function panel(parent, x, y, width, height)
   local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   frame:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
   frame:SetSize(width, height)
-  frame:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 32, edgeSize = 16,
+  frame:SetBackdrop({ edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 4 } })
-  frame:SetBackdropColor(0.13, 0.10, 0.06, 0.96)
-  frame:SetBackdropBorderColor(0.60, 0.48, 0.25)
+  stone(frame, width, height, 0.48)
+  frame:SetBackdropBorderColor(0.47, 0.38, 0.22)
   return frame
 end
 local function button(parent, label, x, y, width, height, click)
@@ -72,10 +86,11 @@ function UI:Build()
   window:SetClampedToScreen(true)
   window:EnableMouse(true)
   window:SetMovable(true)
-  window:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", tile = true, tileSize = 32, edgeSize = 32,
+  window:SetBackdrop({ edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", edgeSize = 32,
     insets = { left = 10, right = 10, top = 10, bottom = 10 } })
-  window:SetBackdropColor(0.22, 0.17, 0.10, 1)
+  stone(window, W, H, 0.70)
+  local header = panel(window, 12, -12, 576, 62)
+  header:SetBackdropBorderColor(0.60, 0.46, 0.23)
   local drag = CreateFrame("Frame", nil, window)
   drag:SetPoint("TOPLEFT", 12, -8)
   drag:SetPoint("TOPRIGHT", -42, -8)
@@ -85,24 +100,35 @@ function UI:Build()
   drag:SetScript("OnDragStart", function() window:StartMoving() end)
   drag:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
   local emblem = drag:CreateTexture(nil, "ARTWORK")
-  emblem:SetSize(42, 42)
-  emblem:SetPoint("LEFT", 8, 0)
+  emblem:SetSize(34, 34)
+  emblem:SetPoint("TOPLEFT", 15, -13)
   emblem:SetTexture(AF.ACTIVITY_ICON)
   local mask = drag:CreateMaskTexture()
   mask:SetAllPoints(emblem)
   mask:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
   emblem:AddMaskTexture(mask)
-  self.title = line(drag, 64, -10, 425, AF:T("TITLE"), 23, C.gold)
-  self.subtitle = line(drag, 65, -38, 425, AF:T("TAGLINE"), 12, C.muted)
+  local rim = drag:CreateTexture(nil, "OVERLAY")
+  rim:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+  rim:SetSize(90, 90)
+  rim:SetPoint("TOPLEFT", 3, -5)
+  self.title = line(drag, 76, -10, 404, AF:T("TITLE"), 23, C.gold)
+  self.subtitle = line(drag, 77, -38, 404, AF:T("TAGLINE"), 11, C.muted)
+  self.subtitle:SetHeight(22)
   self.close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
   self.close:SetPoint("TOPRIGHT", -6, -6)
   self.close:SetScript("OnClick", function() window:Hide() end)
   table.insert(UISpecialFrames, "AzerothFitnessWindow")
 
   self.tabs, self.pages = {}, {}
+  window.minTabWidth, window.maxTabWidth, window.tabPadding = 130, 130, 12
   for i, id in ipairs({ "today", "history", "records", "settings" }) do
-    self.tabs[id] = button(window, AF:T(string.upper(id)), 22 + (i - 1) * 140, -78, 136, 26,
-      function() UI:Show(id) end)
+    local tab = CreateFrame("Button", nil, window, "PanelTopTabButtonTemplate")
+    tab:SetPoint("TOPLEFT", 24 + (i - 1) * 139, -79)
+    tab:SetSize(130, 32)
+    tab:SetText(AF:T(string.upper(id)))
+    tab:SetScript("OnClick", function() UI:Show(id) end)
+    function tab:SetLabel(value) self:SetText(value) end
+    self.tabs[id] = tab
     local page = CreateFrame("Frame", nil, window)
     page:SetPoint("TOPLEFT", 20, -115)
     page:SetPoint("BOTTOMRIGHT", -20, 20)
@@ -124,11 +150,12 @@ function UI:BuildToday()
     local id, key = entry[1], entry[2]
     local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
     local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
-    local value = line(frame, 15, -33, 385, "", 23, C.white)
+    local value = line(frame, 15, -33, 210, "", 26, C.white)
+    local target = line(frame, 227, -43, 190, "", 14, C.muted)
     local percent = line(frame, 428, -37, 116, "", 16, C[id])
     percent:SetJustifyH("RIGHT")
     local progress = bar(frame, 14, -64, 532, 18, C[id])
-    self.goals[id] = { label = label, value = value, percent = percent, bar = progress, key = key }
+    self.goals[id] = { label = label, value = value, target = target, percent = percent, bar = progress, key = key }
   end
   local details = panel(page, 0, -352, 560, 100)
   self.distanceTitle = line(details, 14, -12, 235, AF:T("DISTANCE"), 12, C.gold)
@@ -192,7 +219,7 @@ local function edit(parent, x, y, initial)
 end
 
 function UI:SaveSettings()
-  local stride = tonumber(self.strideInput:GetText())
+  local stride = tonumber((self.strideInput:GetText():gsub(",", ".")))
   if not stride or stride ~= stride or stride < 0.3 or stride > 5 then
     AF:Say(AF:T("BAD_STRIDE")); return
   end
@@ -224,41 +251,16 @@ function UI:BuildSettings()
   self.savedNote:SetHeight(38)
 
   local options = panel(page, 0, -286, 560, 210)
-  self.languageLabel = line(options, 16, -15, 520, AF:T("LOCALE"), 14, C.gold)
-  for i, entry in ipairs({ { "Auto", "auto" }, { "English", "en" }, { "Русский", "ru" } }) do
-    button(options, entry[1], 16 + (i - 1) * 177, -43, 170, 26, function()
-      AF.db.language = entry[2]
-      UI:Relocalize()
-      UI:Refresh()
-    end)
-  end
   self.minimapToggle = CreateFrame("CheckButton", nil, options, "UICheckButtonTemplate")
-  self.minimapToggle:SetPoint("TOPLEFT", 11, -86)
-  self.minimapLabel = line(options, 45, -94, 490, AF:T("SHOW_MINIMAP"), 13)
+  self.minimapToggle:SetPoint("TOPLEFT", 11, -14)
+  self.minimapLabel = line(options, 45, -22, 490, AF:T("SHOW_MINIMAP"), 13)
   self.minimapToggle:SetScript("OnClick", function(self)
     AF.db.showMinimap = self:GetChecked() and true or false
     UI.mapButton:SetShown(AF.db.showMinimap)
   end)
-  self.dateNote = line(options, 16, -137, 525, AF:T("LOCAL_DATE"), 12, C.muted)
-  self.estimateNote = line(options, 16, -166, 525, AF:T("ESTIMATE"), 11, C.muted)
+  self.dateNote = line(options, 16, -68, 525, AF:T("LOCAL_DATE"), 12, C.muted)
+  self.estimateNote = line(options, 16, -104, 525, AF:T("ESTIMATE"), 11, C.muted)
   self.estimateNote:SetHeight(32)
-end
-
-function UI:Relocalize()
-  for _, entry in ipairs({ { self.title, "TITLE" }, { self.subtitle, "TAGLINE" },
-      { self.todayLabel, "DAILY_ACTIVITY" }, { self.distanceTitle, "DISTANCE" },
-      { self.disclaimer, "ESTIMATE" }, { self.historyFootnote, "LOCAL_DATE" },
-      { self.achievementTitle, "ACHIEVEMENTS" }, { self.settingsTitle, "DAILY_GOALS" },
-      { self.goalLabel, "GOAL" }, { self.jumpGoalLabel, "JUMP_GOAL" }, { self.murloGoalLabel, "MURLO_GOAL" },
-      { self.strideLabel, "STRIDE" }, { self.savedNote, "GOALS_NOTE" }, { self.languageLabel, "LOCALE" },
-      { self.minimapLabel, "SHOW_MINIMAP" }, { self.dateNote, "LOCAL_DATE" }, { self.estimateNote, "ESTIMATE" } }) do
-    entry[1]:SetText(AF:T(entry[2]))
-  end
-  for id, tab in pairs(self.tabs) do tab:SetLabel(AF:T(string.upper(id))) end
-  for _, goal in pairs(self.goals) do goal.label:SetText(AF:T(goal.key)) end
-  self.week:SetLabel(AF:T("WEEK"))
-  self.month:SetLabel(AF:T("MONTH"))
-  self.save:SetLabel(AF:T("SAVE"))
 end
 
 function UI:Refresh()
@@ -268,9 +270,10 @@ function UI:Refresh()
   local targets = { steps = today.goal, jumps = today.activityGoals.jumps, murlos = today.activityGoals.murlos }
   for id, goal in pairs(self.goals) do
     local current, target = today[id], targets[id]
-    local value = id == "murlos" and string.format("%.1f", current) or AF:FormatNumber(current)
-    goal.value:SetText(value .. " / " .. AF:FormatNumber(target))
-    goal.percent:SetText(math.floor(current / target * 100) .. "%")
+    local value = id == "murlos" and AF:FormatDecimal(current, 1) or AF:FormatNumber(current)
+    goal.value:SetText(value)
+    goal.target:SetText("/ " .. AF:FormatNumber(target))
+    goal.percent:SetText(math.floor(current * 100 / target + 0.000000001) .. "%")
     goal.bar:SetProgress(current / target)
   end
   self.distance:SetText(AF:FormatDistance(AF:FootYards(today)))
@@ -335,12 +338,13 @@ function UI:Show(page)
     self.goalInput:SetText(tostring(AF.char.goal))
     self.jumpGoalInput:SetText(tostring(AF.char.activityGoals.jumps))
     self.murloGoalInput:SetText(tostring(AF.char.activityGoals.murlos))
-    self.strideInput:SetText(string.format("%.2f", AF:Stride("run")))
+    self.strideInput:SetText(AF:FormatDecimal(AF:Stride("run"), 2))
     self.minimapToggle:SetChecked(AF.db.showMinimap)
   end
   for id, frame in pairs(self.pages) do
     frame:SetShown(id == self.page)
-    self.tabs[id]:SetEnabled(id ~= self.page)
+    if id == self.page then PanelTemplates_SelectTab(self.tabs[id])
+    else PanelTemplates_DeselectTab(self.tabs[id]) end
   end
   self.window:Show()
   self:Refresh()

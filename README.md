@@ -14,7 +14,7 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 - Walking, running, backpedaling, left/right strafing and swimming distances
 - Jumps and fictional Murlocalories
 - Seven humorous achievements
-- English and Russian UI, automatic game-locale selection
+- All 12 official WoW client locales, selected automatically from the game language
 - WoW-native gold-framed dashboard, horizontal activity progress bars and locale-aware client fonts
 - Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
 
@@ -31,18 +31,20 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 - /af — toggle window
 - /af stats — today's statistics
 - /af history — daily chart
-- /af settings — goal, stride and language
+- /af settings — daily goals, stride and minimap visibility
 - /af debug — last motion mode / measurement source
 
 ## Dashboard and daily goals
 
-The dashboard uses Blizzard dialog backgrounds and gold borders, native buttons, status bars and the client's own font face. The owner supplied Overlord as a visual reference for a dark, gold-framed WoW presentation, and iPhone Fitness as a reference for daily activity goals. No Overlord or Apple art is included. This preview uses horizontal bars; circular activity rings remain future work.
+The dashboard uses an opaque base with tiled Blizzard marble texture, gold borders, native tabs/buttons, status bars and the client's own font face. A framed header and separate typography for current values and targets give it a compact adventure-ledger presentation. The owner supplied Overlord as a visual reference for a dark, gold-framed WoW presentation, and iPhone Fitness as a reference for daily activity goals. No Overlord or Apple art is included. This preview uses horizontal bars; circular activity rings remain future work. See [UI design decisions](docs/UI_DESIGN.md).
 
 Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
 
 Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
 
-Native component use and mock tests do not establish the final appearance in every Forever build. Please check ruRU/enUS text, frame sizing, minimap positioning and different UI scales in game.
+**Azeroth Fitness** is the brand in every language and is never translated. The interface follows `GetLocale()` without a language selector or SavedVariables override. Supported client locales: `enUS`, `enGB`, `ruRU`, `deDE`, `frFR`, `esES`, `esMX`, `itIT`, `ptBR`, `koKR`, `zhCN`, `zhTW`. English and Spanish variants share translations; English is the fallback for unknown locales or missing keys. Numbers and distance units follow the client locale. The localization structure follows No Quest Hints Forever.
+
+Native component use and mock tests do not establish the final appearance in every Forever build. Please check translated text, joke wording, frame sizing, minimap positioning and different UI scales in game. Dictionary completeness is tested; native-speaker and client layout reviews remain useful.
 
 ## Measurement integrity
 
@@ -77,7 +79,7 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 - [x] Local daily ledger and lifetime totals
 - [x] Position/speed movement sampler and estimated steps
 - [x] Jump heuristic and Murlocalories
-- [x] Native EN/RU UI and daily charts
+- [x] Native localized UI and daily charts
 - [ ] Forever client smoke tests and compatibility fixes
 - [ ] Calibration and automated tests
 - [ ] More polished charts/activity rings

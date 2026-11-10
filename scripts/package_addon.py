@@ -66,8 +66,8 @@ def manifest() -> tuple[str, list[str]]:
             raise ValueError(f"TOC references missing file: {relative}")
         listed.append(relative)
 
-    if not listed or listed[0] != "AzerothFitness/Locale.lua":
-        raise ValueError("TOC unexpectedly empty or localization no longer loads first")
+    if listed[:2] != ["AzerothFitness/Locale.lua", "AzerothFitness/LocaleTranslations.lua"]:
+        raise ValueError("Locale.lua and LocaleTranslations.lua must load before consumers")
 
     if listed[-1] != "AzerothFitness/Bootstrap.lua":
         raise ValueError("Bootstrap.lua must load last")

@@ -35,6 +35,9 @@ function Methods:GetText() return self.value end
 function Methods:SetFont(face, size, flags) self.font, self.fontSize, self.fontFlags = face, size, flags end
 function Methods:SetFontObject(value) self.fontObject = value end
 function Methods:SetTexture(path) self.texture = path; return true end
+function Methods:SetColorTexture(...) self.solid = { ... } end
+function Methods:SetHorizTile(value) self.horizTile = value end
+function Methods:SetVertTile(value) self.vertTile = value end
 function Methods:SetTexCoord(...) self.texCoord = { ... } end
 function Methods:SetVertexColor(...) self.tint = { ... } end
 function Methods:SetTextColor(...) self.tint = { ... } end
@@ -74,4 +77,6 @@ Minimap:SetSize(200, 200)
 Minimap.centerX, Minimap.centerY = 100, 100
 GameTooltip = object("Tooltip")
 C_Timer = { NewTicker = function(_, callback) Mock.tickers[#Mock.tickers + 1] = callback end }
+PanelTemplates_SelectTab = function(tab) tab.selected = true end
+PanelTemplates_DeselectTab = function(tab) tab.selected = false end
 return Mock
