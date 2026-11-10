@@ -8,14 +8,15 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 
 ## Features
 
-- Daily estimated footsteps and configurable step target
+- Daily estimated footsteps, jumps and fictional Murlocalories with separate configurable targets
 - Character-specific lifetime totals, best day and goal streak
 - 7-day and 30-day history charts
 - Walking, running, backpedaling, left/right strafing and swimming distances
 - Jumps and fictional Murlocalories
 - Seven humorous achievements
-- English and Russian UI, automatic game-locale selection
-- Native UI, minimap button and slash commands
+- All 12 official WoW client locales, selected automatically from the game language
+- Native portrait-frame dashboard with right-side icon tabs, horizontal activity bars and client fonts
+- Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
 
 ## Installation
 
@@ -30,8 +31,22 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 - /af — toggle window
 - /af stats — today's statistics
 - /af history — daily chart
-- /af settings — goal, stride and language
+- /af settings — daily goals, stride and minimap visibility
 - /af debug — last motion mode / measurement source
+
+## Dashboard and daily goals
+
+The dashboard inherits the same `PortraitFrameTemplate` used by Forever's professions window: native portrait, title strip, nine-slice border and close button. Its right-side icon tabs use `LargeSideTabButtonTemplate`, as in the character/professions windows. Inner frames use the professions recipe-list texture at its original tint, with native rock/marble fallback. The Fitness-inspired activity bars remain addon-owned content. No Overlord or Apple art is included; circular activity rings remain future work. See [UI design decisions](docs/UI_DESIGN.md) and the [native-source/API research](docs/NATIVE_UI_RESEARCH.md).
+
+Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
+
+Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
+
+Settings register under **Options → AddOns → Azeroth Fitness** when the native canvas API is available. `/af settings`, the settings side tab and minimap right-click open that same form, using current saved goals/stride/minimap preferences. Clients without that API retain the embedded form; there is no second settings store. **Report a problem** opens a copyable Issues URL with localized instructions. It does not open a browser or submit a report. Dashboard refresh timers exist only while the activity window is visible.
+
+**Azeroth Fitness** is the brand in every language and is never translated. The interface follows `GetLocale()` without a language selector or SavedVariables override. Supported client locales: `enUS`, `enGB`, `ruRU`, `deDE`, `frFR`, `esES`, `esMX`, `itIT`, `ptBR`, `koKR`, `zhCN`, `zhTW`. English and Spanish variants share translations; English is the fallback for unknown locales or missing keys. Numbers and distance units follow the client locale. The localization structure follows No Quest Hints Forever.
+
+Native component use and mock tests do not establish the final appearance in every Forever build. Please check translated text, joke wording, frame sizing, minimap positioning and different UI scales in game. Dictionary completeness is tested; native-speaker and client layout reviews remain useful.
 
 ## Measurement integrity
 
@@ -49,7 +64,7 @@ Data is saved locally as AzerothFitnessDB via the WoW SavedVariables system, key
 
 ## Forever compatibility
 
-Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. **The engine and UI have not yet been smoke-tested in a live Forever game client**, so function availability, jump hooks, movement direction signs and combat secret-value handling remain validation tasks.
+Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The current portrait-frame redesign and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
 
 ## Research and credits
 
@@ -66,7 +81,7 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 - [x] Local daily ledger and lifetime totals
 - [x] Position/speed movement sampler and estimated steps
 - [x] Jump heuristic and Murlocalories
-- [x] Native EN/RU UI and daily charts
+- [x] Native localized UI and daily charts
 - [ ] Forever client smoke tests and compatibility fixes
 - [ ] Calibration and automated tests
 - [ ] More polished charts/activity rings

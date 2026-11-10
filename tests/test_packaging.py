@@ -86,7 +86,11 @@ class PackagingTests(unittest.TestCase):
                 (self.root / 'AzerothFitness.toc').write_text(original)
 
     def test_load_order_is_checked(self):
-        self.toc(lambda text: text.replace('Locale.lua\nCore.lua', 'Core.lua\nLocale.lua'))
+        self.toc(lambda text: text.replace('Locale.lua\nLocaleTranslations.lua', 'LocaleTranslations.lua\nLocale.lua'))
+        self.run_gate(success=False)
+
+    def test_additional_translations_must_load_before_consumers(self):
+        self.toc(lambda text: text.replace('LocaleTranslations.lua\nCore.lua', 'Core.lua\nLocaleTranslations.lua'))
         self.run_gate(success=False)
 
     def test_filename_version_and_prereleases(self):

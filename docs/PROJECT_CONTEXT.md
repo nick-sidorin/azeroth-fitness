@@ -461,8 +461,55 @@ Local validation: Lua 5.1 parsing and three mocked accounting/motion/jump suites
 
 Addon runtime remains the experimental 0.1.0 baseline, with schema 1 unchanged. No live Forever QA or public release was performed for this infrastructure change. The earlier audit's state-transition, unavailable-speed and incomplete-ledger concerns remain follow-up work. Next priorities remain measurement correctness, persistence robustness and in-client diagnostics before UI polish.
 
-## Shared standards adoption — 2026-11-10
+## 17. Owner-requested native UI preview — 2026-11-10
+
+The owner tested the original dashboard and supplied screenshots: the flat custom styling felt foreign to WoW, Russian text appeared as boxes, and the shortcut was a rectangular rune. The owner requested original Blizzard components, Overlord-inspired dark/gold framing, and a playful Fitness-style activity dashboard. Horizontal bars are explicitly acceptable for this iteration; circular rings are deferred. Do not copy Overlord's art or Apple assets.
+
+Implemented in the preview branch (verify the live PR/Actions for its current state):
+
+- Ordinary `BackdropTemplate` dialogs with Blizzard dark backgrounds/gold borders, `UIPanelButtonTemplate`, `UIPanelCloseButton`, native checkboxes/edit boxes and `StatusBar` textures. Font sizing derives from `GameFontHighlight:GetFont()` rather than a hardcoded Latin font file. Achievements also have English/Russian UI text. Actual client typography is still unverified.
+- Three horizontal progress bars: estimated steps, jumps and fictional Murlocalories. Default targets are 10,000 / 100 / 300. `char.activityGoals` and `day.activityGoals` add jump/Murlocalorie targets without a schema break; existing `char.goal`/`day.goal` remain the step targets. Saving validates all targets before applying them, updates today only, and preserves previous recorded targets. Old history is not backfilled with invented additional targets. Step streak/achievement semantics are unchanged.
+- `Minimap.lua` owns a circular masked Blizzard Sprint icon and tracking border. Left click toggles the window, right click opens settings, and dragging follows the minimap perimeter using scale-correct cursor coordinates. `db.minimapAngle` persists its account-wide angle; the existing `db.showMinimap` gains a checkbox. Cursor polling exists only while dragging. The TOC addon-list icon also uses Sprint.
+- Escape closes the window, its header drags it, and opening fits its scale to the available UI dimensions. History and record views refresh only when selected.
+
+Validation: the shared Lua 5.1 gate includes new UI-interaction, minimap-drag and additive goal-upgrade tests, alongside prior movement/accounting and ZIP tests. Mocks cannot verify appearance, Russian glyph rendering, texture availability or client interaction. Hand over the PR's single installable ZIP for owner QA before merging this UI change. No release, tag or version bump is requested.
+
+Client checklist: install preview and `/reload`; ruRU text without boxes; EN/RU switching; all four tabs; saving each goal and invalid input; yesterday's records unchanged; Escape/close/header drag; circular shortcut, four drag quadrants, reload and minimap/UI scale changes; hide/re-show shortcut via `/af settings`; no window toggle on drag release. Confirm the style against the supplied Overlord reference. Rings and original custom decorative artwork remain later design iterations.
+
+## 18. Brand, automatic localization and textured ledger — 2026-11-10
+
+Owner feedback on the #3 preview confirms that the Russian labels are now readable in the supplied client screenshot and that the direction is promising. The screenshot also shows the game world through the main window and activity panels. The owner requested a visible texture instead of translucency and a more polished Overlord-inspired design. This is feedback on the supplied scenario, not blanket approval of all UI or measurement behavior.
+
+Decisions superseding earlier language/design notes:
+
+- The brand is **Azeroth Fitness** in all locales, not a translated Russian name. No translated TOC title, minimap label or window title.
+- Language comes from `GetLocale()` only. Remove the language buttons and ignore legacy `db.language`. Support all 12 official WoW locales with complete dictionaries, shared enUS/enGB and esES/esMX translations, and English fallback. Use the neighboring No Quest Hints Forever project as the engineering reference. The owner plans a shared guideline there; do not treat it as already available or copy unrelated gameplay policies.
+- Use a genuinely opaque base with tiled native marble, muted gold/brass framing, a framed emblem header, real Blizzard top tabs and distinct typography for current values and targets. See `docs/UI_DESIGN.md`. Do not copy Overlord/Apple art. Rings remain deferred.
+
+Implemented in the updated #3 branch: `LocaleTranslations.lua` loads second, before consumers; complete translation/placeholder/brand checks; localized numeric separators/units; decimal-comma stride input; opaque surfaces and native tabs. The screenshot's 29-jumps/28% rounding error is also covered by a focused regression. Existing activity/goal schema stays compatible. No release, merge approval or universal client validation is implied. Check the latest PR head and Actions artifact rather than reusing the earlier build link.
+
+## 19. Exact native character/professions shell — 2026-11-10
+
+The owner supplied a new tracker screenshot plus Forever character and herbalism windows, explicitly requesting their actual portrait/title-bar/close-button structure, protruding right-side tabs and recipe-list background. This supersedes the handmade gold-dialog frame and top-tab design. The prior screenshot confirms brand/automatic Russian copy and percentage correction are visible; it does not establish motion accuracy or approve this new constructor.
+
+Inspected the actual Camelot variants and shared templates/mixins/API documentation in the `forever` UI source. The implementation now inherits `PortraitFrameTemplate`, uses its portrait, title, NineSlice and close callback, and instantiates `LargeSideTabButtonTemplate` frames with native masks, size, press/hover/checked state and tooltip labels. Navigation uses the native custom mouse-up callback with left-button/inside checks. Content panels use `InsetFrameTemplate`; optional root/recipe-list atlases come directly from professions source at their original tint. Native rock/marble remains if those atlases are missing. Full source mapping is in `docs/NATIVE_UI_RESEARCH.md`.
+
+The base frame is 600 x 590 with sidebar-aware fitting. All existing goals, history, automatic client locales and minimap behavior remain. Tests now model the inherited frame children and callbacks and exercise release-outside, inherited show/close handling, atlas fallback and sidebar fitting. Real-client QA remains: construction, native title/portrait/corners, right-side hover/selection/press, recipe-list grain, close/Escape/drag, locale layout and UI scale. No version bump, merge or release was requested.
+
+No Quest Hints Forever now vendors shared standards at upstream commit `f36540efe61eb90671be1359849cbc6d2ddd85c1` from `nick-sidorin/wow-addon-standards`. Its pinned native-UI guidance/field notes were reviewed for this work. Adopting that development dependency in this repository remains separate from the current visual PR.
+
+## 20. Shared-standard runtime alignment — 2026-11-10
+
+The owner explicitly requested adoption of `wow-addon-standards` by the same pinned-copy/lock procedure as No Quest Hints Forever, and correction of applicable divergences. The dependency/CI work is isolated in PR #4 against main; no runtime change or release belongs to that adoption PR. Its alignment audit records the live main ruleset: PR/squash/linear-history rules are active, but the required-status-check list is empty, so `build` is not enforced. The owner retained control of repository settings; no setting was changed.
+
+Runtime corrections in PR #3: register the existing settings form as a native AddOns canvas, reading current preferences on show/refresh; keep the same form embedded only if the API is unavailable. Recheck late API availability, register once and preserve drafts while already visible. The settings sidebar/command/minimap shortcut open that category, and a localized support action gives a copyable Issues URL with popup-API fallback. A browser is not launched and no message is sent. UI refresh timers now start on window show and cancel on hide, preserving inherited scripts.
+
+Tests cover native/fallback/late settings registration, one form/live values/drafts, support popup edit-box compatibility, missing popup/open APIs, and timer lifetime. All strings are added across the 12 locales in the same change. The shared baseline's CVar restoration, onboarding/presets, controller and feature/New-badge rules apply only if those absent product features are introduced. Actual metadata-based upgrade notices remain a first-version-upgrade release gate. Combined final-head CI and native-settings/window QA remain distinct checks; no release or merge approval for the runtime preview is implied.
+
+## 21. Shared standards adoption integrated — 2026-11-10
 
 The owner requested the same pinned development dependency as No Quest Hints Forever. Reviewed `nick-sidorin/wow-addon-standards` 0.1.0 at `f36540efe61eb90671be1359849cbc6d2ddd85c1`, then used its reviewed sync tool to copy shared instructions/field notes and produce the SHA-256 lock. Root instructions explicitly require reading the local copy. The shared CI/publisher gate verifies it offline; tests reject modified documents, wrong origin/inventory and moving refs. All files stay outside installable runtime/CurseForge packages.
 
 This adoption PR changes no Lua runtime, TOC version or release request. `docs/STANDARDS_ALIGNMENT.md` distinguishes main, pending PR #3 runtime corrections, conditional rules and release-time gates. The UI PR must integrate this adoption and rerun combined checks; it remains subject to native-window QA. Current runtime has no XML or bundled art, so XML packaging is rejected until a recursive include/script and asset-inventory gate is introduced. The actual CurseForge project/public/editor URLs are not configured; do not invent another addon's identifiers.
+
+Adoption PR #4 was squash-merged as `0d9f65ab05d5c3d4af41cd153ef8e8cb6f674456` after green final-head CI. Its main changes were merged into #3 while retaining the native-window work and runtime alignment. The combined gate verifies the same pin before all tests; owner-native-UI QA is still pending.

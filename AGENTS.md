@@ -17,7 +17,8 @@ This is the repository for **Azeroth Fitness**, a humorous but technically serio
 
 - Talk with the maintainer in **Russian**.
 - Write code, comments, repository Markdown, commits, pull requests, changelog and release notes in **English**.
-- Keep the Azeroth Fitness brand untranslated and follow the game language. Cover all 12 official client locales with English fallback; the runtime alignment is tracked in PR #3 and [the adoption audit](docs/STANDARDS_ALIGNMENT.md).
+- Keep **Azeroth Fitness** untranslated in every locale. Follow `GetLocale()` automatically; do not add language-selection controls or honor legacy `db.language` overrides.
+- Support all official client locales: **enUS, enGB, ruRU, deDE, frFR, esES, esMX, itIT, ptBR, koKR, zhCN, zhTW**, with English fallback. Follow the neighboring No Quest Hints Forever patterns where applicable; the pinned shared guidance defines the baseline.
 - Use **feature branch -> pull request -> squash merge**; never push directly to main.
 - Add meaningful automated Lua 5.1 parsing, tests and archive checks; require green checks before merges where branch settings permit.
 - Keep README, changelog, relevant decisions and release descriptions synchronized with real changes. Prefer concise comments and uncluttered UI.
@@ -36,6 +37,8 @@ The existing **v0.1.0** code is an unverified experimental baseline. First inspe
 
 Update docs/PROJECT_CONTEXT.md when a major technical/product decision is validated. Clearly separate **requested**, **implemented in source**, **verified in game**, and **released** status so a future Codex session can continue without relying on chat memory.
 
+For interface work, read [docs/UI_DESIGN.md](docs/UI_DESIGN.md). Use opaque textured native surfaces and original client controls; do not copy the Overlord reference's artwork or introduce secure/glue templates on the assumption that template registration permits addon use.
+
 ## Build and release workflow
 
 - Run `bash scripts/run_ci.sh` with Python 3.9+, `lua5.1` and `luac5.1`. Add regression tests for behavior changes. Use `scripts/package_addon.py` for ZIPs; the TOC plus LICENSE defines installable contents.
@@ -49,7 +52,7 @@ Update docs/PROJECT_CONTEXT.md when a major technical/product decision is valida
 - Target: WoW: Forever / Camelot; TOC Interface 16001; Lua 5.1. Exact owner client build is not yet recorded. Interface metadata is not compatibility proof.
 - Runtime layout: root Lua modules and `AzerothFitness.toc`; packaged root is `AzerothFitness/`. No runtime XML or bundled texture/font assets exist. Referenced Blizzard art stays in the client. Add an XML dependency/asset-inventory gate before introducing either.
 - State: account-level `AzerothFitnessDB`; GUID-keyed character activity, daily history and lifetime totals. Local calendar dates, no automatic retention/deletion, preserve old data on upgrades. Minimap preferences are account-wide; goals/stride are per character.
-- Commands: `/af`, `/af stats`, `/af history`, `/af settings`, `/af debug`. Native AddOns settings/support and visible-only refresh alignment are tracked in PR #3. No onboarding modal, personal CVar manipulation, reset action or controller navigation exists.
+- Commands: `/af`, `/af stats`, `/af history`, `/af settings`, `/af debug`. Native category: Azeroth Fitness, with one shared fallback form, localized copyable support URL and visible-only refresh. Runtime changes remain in PR #3 pending owner QA. No onboarding modal, personal CVar manipulation, reset action or controller navigation exists.
 - Source: https://github.com/nick-sidorin/azeroth-fitness; Issues: https://github.com/nick-sidorin/azeroth-fitness/issues.
 - CurseForge project, public URL and description-editor URL are not configured. Do not copy another project's ID or claim publication. Record the owner's actual URLs before a CurseForge release.
 - CI entry point: `bash scripts/run_ci.sh`; check name `build`; package with `python3 scripts/package_addon.py dist/AzerothFitness-v0.1.0.zip`. Repository settings remain owner-managed; verify enforcement separately from a passing run.

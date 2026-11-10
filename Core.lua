@@ -9,6 +9,7 @@ AF.FOOT = { run = true, walk = true, back = true, strafeLeft = true, strafeRight
 AF.MURLO_PER_100Y = { run = 1.8, walk = 1.2, back = 2.2, strafeLeft = 2.4,
   strafeRight = 2.4, unknown = 1.8, swim = 2.0 }
 AF.MURLO_JUMP = 0.75
+AF.DEFAULT_ACTIVITY_GOALS = { jumps = 100, murlos = 300 }
 
 -- Deliberately coarse race defaults, NOT measured animation footfalls.
 -- Per-character calibration in Settings overrides these estimates.
@@ -40,9 +41,25 @@ function AF:Today()
   if not day then
     day = self:NewLedger()
     day.goal = self.char.goal
+    day.activityGoals = { jumps = self.char.activityGoals.jumps, murlos = self.char.activityGoals.murlos }
     self.char.days[key] = day
   end
   return day, key
+end
+
+function AF:SetDailyGoals(steps, jumps, murlos)
+  local function valid(value, minimum, maximum)
+    return type(value) == "number" and value == value and value >= minimum and value <= maximum
+  end
+  if not valid(steps, 100, 1000000) then return false, "BAD_GOAL" end
+  if not valid(jumps, 1, 100000) then return false, "BAD_JUMP_GOAL" end
+  if not valid(murlos, 1, 100000) then return false, "BAD_MURLO_GOAL" end
+  self.char.goal = math.floor(steps)
+  self.char.activityGoals = { jumps = math.floor(jumps), murlos = math.floor(murlos) }
+  local day = self:Today()
+  day.goal = self.char.goal
+  day.activityGoals = { jumps = self.char.activityGoals.jumps, murlos = self.char.activityGoals.murlos }
+  return true
 end
 
 function AF:Stride(gait)
@@ -158,7 +175,7 @@ function AF:CheckAchievements()
   for _, award in ipairs(self.ACHIEVEMENTS) do
     if not self.char.achievements[award.id] and award.value(self) then
       self.char.achievements[award.id] = self:DayKey()
-      self:Say("Achievement unlocked: " .. award.name)
+      self:Say(string.format(self:T("AWARD_UNLOCKED"), self:T("AWARD_" .. award.id)))
     end
   end
 end
@@ -170,13 +187,21 @@ end
 function AF:FormatNumber(n)
   local s = tostring(floor((n or 0) + 0.5))
   local sign, body = s:match("^(%-?)(%d+)$")
-  return sign .. body:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+  local separator = self:GetNumberSeparators()
+  local grouped = body:reverse():gsub("(%d%d%d)", "%1~"):reverse():gsub("^~", "")
+  return sign .. grouped:gsub("~", separator)
+end
+
+function AF:FormatDecimal(value, places)
+  local _, decimal = self:GetNumberSeparators()
+  local formatted = string.format("%." .. places .. "f", value)
+  return (formatted:gsub("%.", decimal))
 end
 
 function AF:FormatDistance(yards)
   local meters = (yards or 0) * self.METERS_PER_YARD
-  if meters < 1000 then return self:FormatNumber(meters) .. " m" end
-  return string.format("%.2f km", meters / 1000)
+  if meters < 1000 then return self:FormatNumber(meters) .. " " .. self:T("METERS") end
+  return self:FormatDecimal(meters / 1000, 2) .. " " .. self:T("KILOMETERS")
 end
 
 function AF:Init()
@@ -184,7 +209,6 @@ function AF:Init()
   local db = AzerothFitnessDB
   db.schema = db.schema or self.SCHEMA
   db.characters = db.characters or {}
-  db.language = db.language or "auto"
   db.showMinimap = db.showMinimap ~= false
   self.db = db
 end
@@ -200,6 +224,13 @@ function AF:Login()
   end
   char.days = char.days or {}
   char.goal = char.goal or 10000
+  if type(char.activityGoals) ~= "table" then char.activityGoals = {} end
+  for key, default in pairs(self.DEFAULT_ACTIVITY_GOALS) do
+    local value = char.activityGoals[key]
+    if type(value) ~= "number" or value ~= value or value < 1 or value > 100000 then
+      char.activityGoals[key] = default
+    end
+  end
   char.total = char.total or self:NewLedger()
   char.total.yards = char.total.yards or {}
   char.total.coverage = char.total.coverage or { position = 0, speed = 0 }
@@ -210,5 +241,13 @@ function AF:Login()
   end
   char.achievements = char.achievements or {}
   self.char = char
-  self:Today()
+  local today = self:Today()
+  -- Introduce additional targets for today only; do not invent historical goals.
+  if type(today.activityGoals) ~= "table" then today.activityGoals = {} end
+  for key, default in pairs(char.activityGoals) do
+    local value = today.activityGoals[key]
+    if type(value) ~= "number" or value ~= value or value < 1 or value > 100000 then
+      today.activityGoals[key] = default
+    end
+  end
 end
