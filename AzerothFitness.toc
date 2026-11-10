@@ -2,6 +2,7 @@
 ## AllowLoadGameType: camelot
 ## Title: Azeroth Fitness
 ## Title-ruRU: Фитнес Азерота
+## IconTexture: Interface\Icons\Ability_Rogue_Sprint
 ## Notes: A very serious fitness tracker for a very sedentary adventurer.
 ## Notes-ruRU: Очень серьёзный фитнес-трекер для сидячего героя.
 ## Author: nick-sidorin
@@ -12,5 +13,6 @@ Locale.lua
 Core.lua
 Motion.lua
 Jump.lua
+Minimap.lua
 UI.lua
 Bootstrap.lua

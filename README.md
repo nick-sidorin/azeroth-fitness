@@ -8,14 +8,15 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 
 ## Features
 
-- Daily estimated footsteps and configurable step target
+- Daily estimated footsteps, jumps and fictional Murlocalories with separate configurable targets
 - Character-specific lifetime totals, best day and goal streak
 - 7-day and 30-day history charts
 - Walking, running, backpedaling, left/right strafing and swimming distances
 - Jumps and fictional Murlocalories
 - Seven humorous achievements
 - English and Russian UI, automatic game-locale selection
-- Native UI, minimap button and slash commands
+- WoW-native gold-framed dashboard, horizontal activity progress bars and locale-aware client fonts
+- Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
 
 ## Installation
 
@@ -32,6 +33,16 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 - /af history — daily chart
 - /af settings — goal, stride and language
 - /af debug — last motion mode / measurement source
+
+## Dashboard and daily goals
+
+The dashboard uses Blizzard dialog backgrounds and gold borders, native buttons, status bars and the client's own font face. The owner supplied Overlord as a visual reference for a dark, gold-framed WoW presentation, and iPhone Fitness as a reference for daily activity goals. No Overlord or Apple art is included. This preview uses horizontal bars; circular activity rings remain future work.
+
+Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
+
+Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
+
+Native component use and mock tests do not establish the final appearance in every Forever build. Please check ruRU/enUS text, frame sizing, minimap positioning and different UI scales in game.
 
 ## Measurement integrity
 

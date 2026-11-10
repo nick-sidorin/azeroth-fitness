@@ -47,3 +47,7 @@ Dalorrian's Step Counter and Mostly Walking were investigated as search targets,
 7. Locale, UI size, local-day rollover and SavedVariables persistence.
 
 Architecture: Core manages ledgers; Motion and Jump generate events; UI reads state. No external service, injected movement commands or borrowed external licensed assets.
+
+## Native UI source check — 2026-11-10
+
+Inspected the `forever` branch of [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source/tree/forever), including `Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml`, `Blizzard_SharedXML/CommonUIPanelTemplates.xml`, `Blizzard_UIPanelTemplates/Mainline/UIPanelTemplates.xml` and `Blizzard_Minimap/Mainline/Minimap.xml`. These establish source-level evidence for native buttons, close buttons, inset frames and status-bar textures, not permission to instantiate every template or proof of in-game appearance. The preview uses ordinary addon-owned Backdrop frames, native controls, dialog/tooltip borders and masked minimap art; it avoids secure/gamepad templates. The owner's Overlord screenshot is a styling reference, not a source of copied assets.

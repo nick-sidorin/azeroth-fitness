@@ -4,6 +4,11 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- WoW-native gold-framed dashboard with three horizontal daily activity bars, native buttons and client font faces
+- Separate configurable daily jump and Murlocalorie targets, preserving existing step/history data
+- Masked circular Sprint minimap shortcut with drag positioning, saved angle, right-click settings and visibility control
+- Sprint addon-list icon, localized achievement text, Escape closing and adaptive window scaling
+- UI, minimap interaction and additive goal-upgrade regression suites
 - PR and manual preview builds using the `build` check, matching the No Quest Hints Forever workflow
 - Shared Lua 5.1 syntax and mocked regression gates for accounting, motion and jump logic
 - TOC-derived reproducible ZIP packaging with archive regression tests and direct-install test artifacts

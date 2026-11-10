@@ -69,5 +69,5 @@ near(AF.char.total.steps, 320)
 AF.db.language = "ru"
 assert(AF:T("TODAY") ~= "TODAY")
 AF.db.language = "en"
-assert(AF:T("TODAY") == "TODAY")
+assert(AF:T("TODAY") == "Today")
 print("PASS: daily/lifetime accounting, fictional calories, reload, goals, dates, streak and character isolation")

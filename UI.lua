@@ -2,310 +2,330 @@ local _, AF = ...
 local UI = {}
 AF.UI = UI
 
-local W, H = 520, 570
+local W, H = 600, 650
 local C = {
-  bg = { 0.055, 0.075, 0.10, 0.98 }, panel = { 0.105, 0.135, 0.18, 1 },
-  subtle = { 0.18, 0.22, 0.28, 1 }, white = { 0.94, 0.96, 0.98 },
-  muted = { 0.56, 0.64, 0.73 }, lime = { 0.60, 0.94, 0.50 },
-  cyan = { 0.43, 0.78, 0.98 }, orange = { 1, 0.69, 0.36 },
+  gold = { 1, 0.82, 0 }, white = { 1, 1, 1 }, muted = { 0.68, 0.65, 0.58 },
+  steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 },
 }
-local function color(fs, c) fs:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
-local function rect(parent, layer, c)
-  local t = parent:CreateTexture(nil, layer or "BACKGROUND")
-  t:SetColorTexture(c[1], c[2], c[3], c[4] or 1)
-  return t
-end
-local function text(parent, value, size, c, justify)
-  local fs = parent:CreateFontString(nil, "OVERLAY")
-  fs:SetFont("Fonts\\FRIZQT__.TTF", size or 13, "")
+local function color(fs, c) fs:SetTextColor(c[1], c[2], c[3]) end
+local function text(parent, value, size, tint, justify)
+  local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  -- Use the client's locale-aware face; hardcoded FRIZQT lacks Cyrillic in ruRU.
+  local face, _, flags = GameFontHighlight:GetFont()
+  fs:SetFont(face, size or 13, flags or "")
   fs:SetText(value or "")
   fs:SetJustifyH(justify or "LEFT")
-  color(fs, c or C.white)
+  color(fs, tint or C.white)
   return fs
 end
-local function panel(parent, x, y, w, h)
-  local f = CreateFrame("Frame", nil, parent)
-  f:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  f:SetSize(w, h)
-  local bg = rect(f, "BACKGROUND", C.panel)
-  bg:SetAllPoints()
-  return f
+local function line(parent, x, y, width, value, size, tint)
+  local fs = text(parent, value, size, tint)
+  fs:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  fs:SetWidth(width)
+  return fs
 end
-local function button(parent, label, x, y, w, h, click)
-  local b = CreateFrame("Button", nil, parent)
+local function panel(parent, x, y, width, height)
+  local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+  frame:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  frame:SetSize(width, height)
+  frame:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 32, edgeSize = 16,
+    insets = { left = 4, right = 4, top = 4, bottom = 4 } })
+  frame:SetBackdropColor(0.13, 0.10, 0.06, 0.96)
+  frame:SetBackdropBorderColor(0.60, 0.48, 0.25)
+  return frame
+end
+local function button(parent, label, x, y, width, height, click)
+  local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
   b:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  b:SetSize(w, h)
-  local bg = rect(b, "BACKGROUND", C.subtle)
-  bg:SetAllPoints()
-  b:SetNormalFontObject("GameFontNormal")
-  local fs = text(b, label, 12, C.white, "CENTER")
-  fs:SetAllPoints()
+  b:SetSize(width, height)
+  b:SetText(label)
   b:SetScript("OnClick", click)
-  b:SetScript("OnEnter", function() bg:SetColorTexture(0.25, 0.34, 0.39, 1) end)
-  b:SetScript("OnLeave", function()
-    bg:SetColorTexture(C.subtle[1], C.subtle[2], C.subtle[3], 1)
-  end)
-  function b:SetLabel(v) fs:SetText(v) end
+  function b:SetLabel(value) self:SetText(value) end
   return b
 end
-local function line(parent, x, y, w, value, size, tint)
-  local label = text(parent, value, size, tint)
-  label:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  label:SetWidth(w)
-  return label
+local function bar(parent, x, y, width, height, tint)
+  local surround = panel(parent, x, y, width, height)
+  local status = CreateFrame("StatusBar", nil, surround)
+  status:SetPoint("TOPLEFT", 4, -4)
+  status:SetPoint("BOTTOMRIGHT", -4, 4)
+  status:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+  status:SetStatusBarColor(tint[1], tint[2], tint[3])
+  status:SetMinMaxValues(0, 1)
+  status:SetValue(0)
+  function surround:SetProgress(value) status:SetValue(math.max(0, math.min(1, value or 0))) end
+  surround.status = status
+  return surround
 end
-local function bar(parent, x, y, width, height, fillColor)
-  local f = CreateFrame("Frame", nil, parent)
-  f:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  f:SetSize(width, height)
-  local background = rect(f, "BACKGROUND", C.subtle)
-  background:SetAllPoints()
-  local fill = rect(f, "ARTWORK", fillColor)
-  fill:SetPoint("TOPLEFT", f, "TOPLEFT")
-  fill:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT")
-  f.fill = fill
-  function f:SetProgress(p)
-    fill:SetWidth(math.max(0.1, math.min(1, p or 0) * width))
-  end
-  return f
+
+function UI:Fit()
+  self.window:SetScale(math.min(1, UIParent:GetWidth() * 0.94 / W, UIParent:GetHeight() * 0.94 / H))
 end
 
 function UI:Build()
-  local window = CreateFrame("Frame", "AzerothFitnessWindow", UIParent)
+  local window = CreateFrame("Frame", "AzerothFitnessWindow", UIParent, "BackdropTemplate")
+  self.window = window
+  window:Hide()
   window:SetSize(W, H)
   window:SetPoint("CENTER")
   window:SetFrameStrata("DIALOG")
   window:SetClampedToScreen(true)
   window:EnableMouse(true)
   window:SetMovable(true)
-  window:RegisterForDrag("LeftButton")
-  window:SetScript("OnDragStart", window.StartMoving)
-  window:SetScript("OnDragStop", window.StopMovingOrSizing)
-  local bg = rect(window, "BACKGROUND", C.bg)
-  bg:SetAllPoints()
-  local header = rect(window, "BORDER", C.panel)
-  header:SetPoint("TOPLEFT")
-  header:SetPoint("TOPRIGHT")
-  header:SetHeight(58)
-  self.title = line(window, 18, -18, 355, AF:T("TITLE"), 19, C.lime)
-  self.close = button(window, "X", W - 43, -12, 30, 30, function() window:Hide() end)
-  self.tabs = {
-    today = button(window, AF:T("TODAY"), 16, -69, 110, 30, function() UI:Show("today") end),
-    history = button(window, AF:T("HISTORY"), 135, -69, 110, 30, function() UI:Show("history") end),
-    records = button(window, AF:T("RECORDS"), 254, -69, 110, 30, function() UI:Show("records") end),
-    settings = button(window, AF:T("SETTINGS"), 373, -69, 129, 30, function() UI:Show("settings") end),
-  }
-  self.pages = {}
-  for _, id in ipairs({ "today", "history", "records", "settings" }) do
+  window:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", tile = true, tileSize = 32, edgeSize = 32,
+    insets = { left = 10, right = 10, top = 10, bottom = 10 } })
+  window:SetBackdropColor(0.22, 0.17, 0.10, 1)
+  local drag = CreateFrame("Frame", nil, window)
+  drag:SetPoint("TOPLEFT", 12, -8)
+  drag:SetPoint("TOPRIGHT", -42, -8)
+  drag:SetHeight(64)
+  drag:EnableMouse(true)
+  drag:RegisterForDrag("LeftButton")
+  drag:SetScript("OnDragStart", function() window:StartMoving() end)
+  drag:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
+  local emblem = drag:CreateTexture(nil, "ARTWORK")
+  emblem:SetSize(42, 42)
+  emblem:SetPoint("LEFT", 8, 0)
+  emblem:SetTexture(AF.ACTIVITY_ICON)
+  local mask = drag:CreateMaskTexture()
+  mask:SetAllPoints(emblem)
+  mask:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+  emblem:AddMaskTexture(mask)
+  self.title = line(drag, 64, -10, 425, AF:T("TITLE"), 23, C.gold)
+  self.subtitle = line(drag, 65, -38, 425, AF:T("TAGLINE"), 12, C.muted)
+  self.close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
+  self.close:SetPoint("TOPRIGHT", -6, -6)
+  self.close:SetScript("OnClick", function() window:Hide() end)
+  table.insert(UISpecialFrames, "AzerothFitnessWindow")
+
+  self.tabs, self.pages = {}, {}
+  for i, id in ipairs({ "today", "history", "records", "settings" }) do
+    self.tabs[id] = button(window, AF:T(string.upper(id)), 22 + (i - 1) * 140, -78, 136, 26,
+      function() UI:Show(id) end)
     local page = CreateFrame("Frame", nil, window)
-    page:SetPoint("TOPLEFT", window, "TOPLEFT", 0, -105)
-    page:SetPoint("BOTTOMRIGHT", window)
+    page:SetPoint("TOPLEFT", 20, -115)
+    page:SetPoint("BOTTOMRIGHT", -20, 20)
     self.pages[id] = page
   end
   self:BuildToday()
   self:BuildHistory()
   self:BuildRecords()
   self:BuildSettings()
-  self.window = window
-  window:Hide()
+  window:SetScript("OnShow", function() UI:Fit() end)
 end
 
 function UI:BuildToday()
-  local p = self.pages.today
-  local summary = panel(p, 16, -8, 488, 163)
-  self.todayLabel = line(summary, 17, -14, 450, AF:T("TODAY"), 12, C.muted)
-  self.steps = line(summary, 17, -35, 450, "0", 42, C.white)
-  self.stepUnit = line(summary, 18, -91, 150, AF:T("STEPS"), 13, C.muted)
-  self.goalText = line(summary, 315, -93, 155, "", 13, C.lime)
-  self.progress = bar(summary, 17, -120, 452, 13, C.lime)
-
-  local a = panel(p, 16, -180, 236, 94)
-  self.jumpTitle = line(a, 12, -12, 200, AF:T("JUMPS"), 12, C.muted)
-  self.jumps = line(a, 12, -34, 200, "0", 28, C.cyan)
-  local b = panel(p, 268, -180, 236, 94)
-  self.murloTitle = line(b, 12, -12, 205, AF:T("MURLO"), 12, C.muted)
-  self.murlos = line(b, 12, -34, 200, "0", 28, C.orange)
-
-  local c = panel(p, 16, -285, 488, 122)
-  self.distanceTitle = line(c, 12, -12, 460, AF:T("DISTANCE"), 12, C.muted)
-  self.distance = line(c, 12, -33, 455, "", 24, C.white)
-  self.detail = line(c, 12, -75, 456, "", 12, C.muted)
-  self.accuracy = line(p, 18, -419, 474, "", 11, C.muted)
-  self.disclaimer = line(p, 18, -441, 480, AF:T("ESTIMATE"), 11, C.muted)
+  local page = self.pages.today
+  self.todayLabel = line(page, 12, -4, 380, AF:T("DAILY_ACTIVITY"), 17, C.gold)
+  self.todayDate = line(page, 380, -7, 168, "", 12, C.muted)
+  self.goals = {}
+  for i, entry in ipairs({ { "steps", "STEPS" }, { "jumps", "JUMPS" }, { "murlos", "MURLO" } }) do
+    local id, key = entry[1], entry[2]
+    local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
+    local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
+    local value = line(frame, 15, -33, 385, "", 23, C.white)
+    local percent = line(frame, 428, -37, 116, "", 16, C[id])
+    percent:SetJustifyH("RIGHT")
+    local progress = bar(frame, 14, -64, 532, 18, C[id])
+    self.goals[id] = { label = label, value = value, percent = percent, bar = progress, key = key }
+  end
+  local details = panel(page, 0, -352, 560, 100)
+  self.distanceTitle = line(details, 14, -12, 235, AF:T("DISTANCE"), 12, C.gold)
+  self.distance = line(details, 14, -34, 240, "", 23)
+  self.detail = line(details, 270, -17, 275, "", 12, C.muted)
+  self.detail:SetHeight(68)
+  self.accuracy = line(page, 9, -464, 542, "", 11, C.muted)
+  self.disclaimer = line(page, 9, -486, 542, AF:T("ESTIMATE"), 11, C.muted)
+  self.disclaimer:SetHeight(28)
 end
 
 function UI:BuildHistory()
-  local p = self.pages.history
-  self.week = button(p, AF:T("WEEK"), 16, -8, 110, 31, function() UI.range = 7; UI:Refresh() end)
-  self.month = button(p, AF:T("MONTH"), 136, -8, 110, 31, function() UI.range = 30; UI:Refresh() end)
-  self.historySummary = line(p, 17, -52, 480, "", 16, C.white)
+  local page = self.pages.history
+  self.week = button(page, AF:T("WEEK"), 0, -4, 126, 26, function() UI.range = 7; UI:Refresh() end)
+  self.month = button(page, AF:T("MONTH"), 134, -4, 126, 26, function() UI.range = 30; UI:Refresh() end)
+  self.historySummary = line(page, 10, -50, 540, "", 17, C.gold)
+  local chart = panel(page, 0, -90, 560, 300)
   self.historyBars = {}
-  -- Bars are native textures, no external chart dependency or huge vertex buffers.
-  local chart = panel(p, 16, -92, 488, 260)
   for i = 1, 30 do
-    local f = CreateFrame("Frame", nil, chart)
-    self.historyBars[i] = f
-    f:SetWidth(11)
-    f:SetHeight(205)
-    f:SetPoint("BOTTOMLEFT", chart, "BOTTOMLEFT", 14 + (i - 1) * 15.1, 30)
-    local bg = rect(f, "BACKGROUND", C.subtle)
-    bg:SetPoint("BOTTOM")
-    bg:SetSize(11, 205)
-    f.fill = rect(f, "ARTWORK", C.lime)
-    f.fill:SetPoint("BOTTOM")
-    f.fill:SetWidth(11)
-    f.fill:SetHeight(1)
-    local label = text(f, "", 9, C.muted, "CENTER")
-    label:SetPoint("TOP", f, "BOTTOM", 0, -6)
-    f.label = label
+    local b = CreateFrame("Frame", nil, chart)
+    b:SetSize(12, 235)
+    local fill = b:CreateTexture(nil, "ARTWORK")
+    fill:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    fill:SetVertexColor(unpack(C.steps))
+    fill:SetPoint("BOTTOM")
+    local label = text(b, "", 10, C.muted, "CENTER")
+    label:SetPoint("TOP", b, "BOTTOM", 0, -7)
+    b.fill, b.label = fill, label
+    self.historyBars[i] = b
   end
-  self.historyFootnote = line(p, 18, -365, 478, AF:T("LOCAL_DATE"), 12, C.muted)
-  self.historyDates = line(p, 18, -405, 478, "", 12, C.white)
+  self.historyFootnote = line(page, 10, -409, 540, AF:T("LOCAL_DATE"), 12, C.muted)
+  self.historyDates = line(page, 10, -446, 540, "", 13)
 end
 
 function UI:BuildRecords()
-  local p = self.pages.records
-  local box1 = panel(p, 16, -8, 488, 115)
-  self.best = line(box1, 15, -16, 470, "", 16, C.white)
-  self.streak = line(box1, 15, -52, 470, "", 16, C.lime)
-  self.lifetime = line(box1, 15, -84, 470, "", 12, C.muted)
-
-  local box2 = panel(p, 16, -136, 488, 312)
-  self.achievementTitle = line(box2, 15, -12, 452, AF:T("ACHIEVEMENTS"), 14, C.cyan)
+  local page = self.pages.records
+  local summary = panel(page, 0, -4, 560, 116)
+  self.best = line(summary, 15, -16, 530, "", 16, C.gold)
+  self.streak = line(summary, 15, -51, 530, "", 16, C.steps)
+  self.lifetime = line(summary, 15, -86, 530, "", 12, C.muted)
+  local awards = panel(page, 0, -132, 560, 360)
+  self.achievementTitle = line(awards, 15, -13, 530, AF:T("ACHIEVEMENTS"), 16, C.gold)
   self.awards = {}
   for i = 1, #AF.ACHIEVEMENTS do
-    self.awards[i] = line(box2, 15, -39 - (i - 1) * 37, 454, "", 12, C.muted)
+    local label = line(awards, 15, -43 - (i - 1) * 44, 530, "", 12, C.muted)
+    label:SetHeight(38)
+    self.awards[i] = label
   end
 end
 
-local function edit(parent, x, y, width, initial)
-  local f = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
-  f:SetSize(width, 28)
-  f:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  f:SetAutoFocus(false)
-  f:SetText(initial or "")
-  f:SetFontObject("GameFontHighlight")
-  f:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-  return f
+local function edit(parent, x, y, initial)
+  local field = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+  field:SetSize(142, 26)
+  field:SetPoint("TOPLEFT", x, y)
+  field:SetAutoFocus(false)
+  field:SetFontObject("GameFontHighlight")
+  field:SetText(initial or "")
+  field:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+  field:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+  return field
+end
+
+function UI:SaveSettings()
+  local stride = tonumber(self.strideInput:GetText())
+  if not stride or stride ~= stride or stride < 0.3 or stride > 5 then
+    AF:Say(AF:T("BAD_STRIDE")); return
+  end
+  local ok, errorKey = AF:SetDailyGoals(tonumber(self.goalInput:GetText()),
+    tonumber(self.jumpGoalInput:GetText()), tonumber(self.murloGoalInput:GetText()))
+  if not ok then AF:Say(AF:T(errorKey)); return end
+  AF.char.stride = stride
+  for _, input in ipairs({ self.goalInput, self.jumpGoalInput, self.murloGoalInput, self.strideInput }) do
+    input:ClearFocus()
+  end
+  AF:Say(AF:T("SUCCESS"))
+  self:Refresh()
 end
 
 function UI:BuildSettings()
-  local p = self.pages.settings
-  local box1 = panel(p, 16, -8, 488, 267)
-  self.goalLabel = line(box1, 15, -16, 438, AF:T("GOAL"), 14, C.white)
-  self.goalInput = edit(box1, 25, -45, 154, "10000")
-  self.strideLabel = line(box1, 15, -95, 438, AF:T("STRIDE"), 14, C.white)
-  self.strideInput = edit(box1, 25, -124, 154, "2.30")
-  self.save = button(box1, AF:T("SAVE"), 15, -175, 125, 34, function()
-    local goal = tonumber(UI.goalInput:GetText())
-    local stride = tonumber(UI.strideInput:GetText())
-    if not goal or goal < 100 or goal > 1000000 then
-      AF:Say(AF:T("BAD_GOAL")); return
-    end
-    if not stride or stride < 0.3 or stride > 5 then
-      AF:Say(AF:T("BAD_STRIDE")); return
-    end
-    AF.char.goal, AF.char.stride = math.floor(goal), stride
-    -- Existing days retain the goal frozen on that day; today's goal changes.
-    AF:Today().goal = AF.char.goal
-    AF:Say(AF:T("SUCCESS"))
-    UI:Refresh()
-  end)
-  self.savedNote = line(box1, 15, -225, 440, AF:T("ESTIMATE"), 11, C.muted)
+  local page = self.pages.settings
+  local targets = panel(page, 0, -4, 560, 278)
+  self.settingsTitle = line(targets, 15, -14, 520, AF:T("DAILY_GOALS"), 16, C.gold)
+  self.goalLabel = line(targets, 16, -53, 345, AF:T("GOAL"), 13)
+  self.goalInput = edit(targets, 391, -47)
+  self.jumpGoalLabel = line(targets, 16, -94, 345, AF:T("JUMP_GOAL"), 13)
+  self.jumpGoalInput = edit(targets, 391, -88)
+  self.murloGoalLabel = line(targets, 16, -135, 345, AF:T("MURLO_GOAL"), 13)
+  self.murloGoalInput = edit(targets, 391, -129)
+  self.strideLabel = line(targets, 16, -176, 345, AF:T("STRIDE"), 13)
+  self.strideInput = edit(targets, 391, -170)
+  self.save = button(targets, AF:T("SAVE"), 16, -222, 150, 28, function() UI:SaveSettings() end)
+  self.savedNote = line(targets, 185, -224, 350, AF:T("GOALS_NOTE"), 11, C.muted)
+  self.savedNote:SetHeight(38)
 
-  local box2 = panel(p, 16, -289, 488, 156)
-  self.languageLabel = line(box2, 15, -16, 450, AF:T("LOCALE"), 13, C.white)
-  self.languageButtons = {}
+  local options = panel(page, 0, -286, 560, 210)
+  self.languageLabel = line(options, 16, -15, 520, AF:T("LOCALE"), 14, C.gold)
   for i, entry in ipairs({ { "Auto", "auto" }, { "English", "en" }, { "Русский", "ru" } }) do
-    self.languageButtons[i] = button(box2, entry[1], 15 + (i - 1) * 150, -43, 137, 31, function()
+    button(options, entry[1], 16 + (i - 1) * 177, -43, 170, 26, function()
       AF.db.language = entry[2]
       UI:Relocalize()
       UI:Refresh()
     end)
   end
-  self.dateNote = line(box2, 15, -102, 455, AF:T("LOCAL_DATE"), 11, C.muted)
+  self.minimapToggle = CreateFrame("CheckButton", nil, options, "UICheckButtonTemplate")
+  self.minimapToggle:SetPoint("TOPLEFT", 11, -86)
+  self.minimapLabel = line(options, 45, -94, 490, AF:T("SHOW_MINIMAP"), 13)
+  self.minimapToggle:SetScript("OnClick", function(self)
+    AF.db.showMinimap = self:GetChecked() and true or false
+    UI.mapButton:SetShown(AF.db.showMinimap)
+  end)
+  self.dateNote = line(options, 16, -137, 525, AF:T("LOCAL_DATE"), 12, C.muted)
+  self.estimateNote = line(options, 16, -166, 525, AF:T("ESTIMATE"), 11, C.muted)
+  self.estimateNote:SetHeight(32)
 end
 
 function UI:Relocalize()
-  self.title:SetText(AF:T("TITLE"))
-  for id, b in pairs(self.tabs) do b:SetLabel(AF:T(string.upper(id))) end
-  self.todayLabel:SetText(AF:T("TODAY"))
-  self.stepUnit:SetText(AF:T("STEPS"))
-  self.jumpTitle:SetText(AF:T("JUMPS"))
-  self.murloTitle:SetText(AF:T("MURLO"))
-  self.distanceTitle:SetText(AF:T("DISTANCE"))
-  self.disclaimer:SetText(AF:T("ESTIMATE"))
+  for _, entry in ipairs({ { self.title, "TITLE" }, { self.subtitle, "TAGLINE" },
+      { self.todayLabel, "DAILY_ACTIVITY" }, { self.distanceTitle, "DISTANCE" },
+      { self.disclaimer, "ESTIMATE" }, { self.historyFootnote, "LOCAL_DATE" },
+      { self.achievementTitle, "ACHIEVEMENTS" }, { self.settingsTitle, "DAILY_GOALS" },
+      { self.goalLabel, "GOAL" }, { self.jumpGoalLabel, "JUMP_GOAL" }, { self.murloGoalLabel, "MURLO_GOAL" },
+      { self.strideLabel, "STRIDE" }, { self.savedNote, "GOALS_NOTE" }, { self.languageLabel, "LOCALE" },
+      { self.minimapLabel, "SHOW_MINIMAP" }, { self.dateNote, "LOCAL_DATE" }, { self.estimateNote, "ESTIMATE" } }) do
+    entry[1]:SetText(AF:T(entry[2]))
+  end
+  for id, tab in pairs(self.tabs) do tab:SetLabel(AF:T(string.upper(id))) end
+  for _, goal in pairs(self.goals) do goal.label:SetText(AF:T(goal.key)) end
   self.week:SetLabel(AF:T("WEEK"))
   self.month:SetLabel(AF:T("MONTH"))
-  self.historyFootnote:SetText(AF:T("LOCAL_DATE"))
-  self.achievementTitle:SetText(AF:T("ACHIEVEMENTS"))
-  self.goalLabel:SetText(AF:T("GOAL"))
-  self.strideLabel:SetText(AF:T("STRIDE"))
   self.save:SetLabel(AF:T("SAVE"))
-  self.savedNote:SetText(AF:T("ESTIMATE"))
-  self.languageLabel:SetText(AF:T("LOCALE"))
-  self.dateNote:SetText(AF:T("LOCAL_DATE"))
 end
 
 function UI:Refresh()
-  if not self.window or not self.window:IsShown() then return end
-  local today = AF:Today()
-  local goal = today.goal or AF.char.goal
-  self.steps:SetText(AF:FormatNumber(today.steps))
-  self.goalText:SetText(AF:FormatNumber(goal) .. "  /  " .. math.floor(today.steps / goal * 100) .. "%")
-  self.progress:SetProgress(today.steps / goal)
-  self.jumps:SetText(AF:FormatNumber(today.jumps))
-  self.murlos:SetText(string.format("%.1f", today.murlos))
+  if not self.window or not self.window:IsShown() or not AF.char then return end
+  local today, dayKey = AF:Today()
+  self.todayDate:SetText(dayKey)
+  local targets = { steps = today.goal, jumps = today.activityGoals.jumps, murlos = today.activityGoals.murlos }
+  for id, goal in pairs(self.goals) do
+    local current, target = today[id], targets[id]
+    local value = id == "murlos" and string.format("%.1f", current) or AF:FormatNumber(current)
+    goal.value:SetText(value .. " / " .. AF:FormatNumber(target))
+    goal.percent:SetText(math.floor(current / target * 100) .. "%")
+    goal.bar:SetProgress(current / target)
+  end
   self.distance:SetText(AF:FormatDistance(AF:FootYards(today)))
-  self.detail:SetText(string.format("%s: %s  |  %s: %s",
-    AF:T("RUN"), AF:FormatDistance(today.yards.run),
-    AF:T("WALK"), AF:FormatDistance(today.yards.walk)))
-  local total = (today.coverage.position or 0) + (today.coverage.speed or 0)
+  self.detail:SetText(string.format("%s: %s\n%s: %s\n%s: %s",
+    AF:T("RUN"), AF:FormatDistance(today.yards.run), AF:T("WALK"), AF:FormatDistance(today.yards.walk),
+    AF:T("BACK"), AF:FormatDistance(today.yards.back)))
+  local coverage = (today.coverage.position or 0) + (today.coverage.speed or 0)
   self.accuracy:SetText(string.format(AF:T("COVERAGE"),
-    total > 0 and (today.coverage.position or 0) / total * 100 or 0))
+    coverage > 0 and (today.coverage.position or 0) / coverage * 100 or 0))
 
+  -- Only update the chart/records while their page is selected.
+  if self.page == "history" then self:RefreshHistory(today.goal) end
+  if self.page == "records" then self:RefreshRecords() end
+end
+
+function UI:RefreshHistory(goal)
   local range = self.range or 7
-  local aggregate = AF:Aggregate(range)
-  self.historySummary:SetText(AF:FormatNumber(aggregate.steps) .. " " .. AF:T("STEPS")
-    .. "   •   " .. AF:FormatDistance(AF:FootYards(aggregate)))
+  local total = AF:Aggregate(range)
+  self.historySummary:SetText(AF:FormatNumber(total.steps) .. " " .. AF:T("STEPS")
+    .. "  |  " .. AF:FormatDistance(AF:FootYards(total)))
   local maximum = math.max(1, goal)
-  for i = 0, range - 1 do
-    local day = AF.char.days[AF:DayKey(i)]
+  for offset = 0, range - 1 do
+    local day = AF.char.days[AF:DayKey(offset)]
     maximum = math.max(maximum, day and day.steps or 0)
   end
-  for i = 1, 30 do
-    local b = self.historyBars[i]
-    local offset = range - i
+  for i, b in ipairs(self.historyBars) do
     if i <= range then
+      local offset = range - i
       local day = AF.char.days[AF:DayKey(offset)]
       local steps = day and day.steps or 0
-      local width = range == 7 and 60 or 11
-      local gap = range == 7 and 8 or 4.1
+      local width, gap = range == 7 and 65 or 12, range == 7 and 12 or 5.8
       b:SetWidth(width)
       b:ClearAllPoints()
-      b:SetPoint("BOTTOMLEFT", b:GetParent(), "BOTTOMLEFT", 14 + (i - 1) * (width + gap), 30)
+      b:SetPoint("BOTTOMLEFT", b:GetParent(), "BOTTOMLEFT", 15 + (i - 1) * (width + gap), 35)
       b.fill:SetWidth(width)
-      b.fill:SetHeight(math.max(0.5, 205 * steps / maximum))
+      b.fill:SetHeight(math.max(0.1, 235 * steps / maximum))
       b.label:SetText(range == 7 and AF:DayKey(offset):sub(6) or
         ((i == 1 or i == range or i % 5 == 0) and AF:DayKey(offset):sub(9) or ""))
       b:Show()
-    else
-      b:Hide()
-    end
+    else b:Hide() end
   end
-  self.historyDates:SetText(AF:DayKey(range - 1) .. " — " .. AF:DayKey())
+  self.historyDates:SetText(AF:DayKey(range - 1) .. " - " .. AF:DayKey())
+end
 
-  local bestKey, bestSteps = AF:BestDay()
-  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(bestSteps)
-    .. (bestKey and "  (" .. bestKey .. ")" or ""))
+function UI:RefreshRecords()
+  local bestKey, steps = AF:BestDay()
+  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(steps) .. (bestKey and " (" .. bestKey .. ")" or ""))
   self.streak:SetText(AF:T("STREAK") .. ": " .. AF:Streak() .. " " .. AF:T("DAYS"))
-  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps)
-    .. " " .. AF:T("STEPS") .. " • " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
-  for i, a in ipairs(AF.ACHIEVEMENTS) do
-    local won = AF.char.achievements[a.id]
-    local fs = self.awards[i]
-    fs:SetText((won and "✓  " or "○  ") .. a.name .. " — " .. a.desc)
-    color(fs, won and C.lime or C.muted)
+  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps) .. " " .. AF:T("STEPS")
+    .. " | " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
+  for i, award in ipairs(AF.ACHIEVEMENTS) do
+    local won = AF.char.achievements[award.id]
+    local name, description = AF:T("AWARD_" .. award.id), AF:T("AWARD_DESC_" .. award.id)
+    self.awards[i]:SetText(name .. "\n" .. description)
+    color(self.awards[i], won and C.gold or C.muted)
   end
 end
 
@@ -313,10 +333,14 @@ function UI:Show(page)
   self.page = page or self.page or "today"
   if self.page == "settings" then
     self.goalInput:SetText(tostring(AF.char.goal))
+    self.jumpGoalInput:SetText(tostring(AF.char.activityGoals.jumps))
+    self.murloGoalInput:SetText(tostring(AF.char.activityGoals.murlos))
     self.strideInput:SetText(string.format("%.2f", AF:Stride("run")))
+    self.minimapToggle:SetChecked(AF.db.showMinimap)
   end
   for id, frame in pairs(self.pages) do
-    if id == self.page then frame:Show() else frame:Hide() end
+    frame:SetShown(id == self.page)
+    self.tabs[id]:SetEnabled(id ~= self.page)
   end
   self.window:Show()
   self:Refresh()
@@ -327,23 +351,7 @@ end
 function UI:Init()
   self.range = 7
   self:Build()
-  local mapButton = CreateFrame("Button", "AzerothFitnessMinimapButton", Minimap)
-  mapButton:SetSize(27, 27)
-  mapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", -8, -10)
-  mapButton:SetNormalTexture("Interface\\Icons\\INV_Misc_Rune_01")
-  mapButton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-  mapButton:RegisterForClicks("LeftButtonUp")
-  mapButton:SetScript("OnClick", function() UI:Toggle() end)
-  mapButton:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("Azeroth Fitness")
-    GameTooltip:AddLine(AF:T("HELP"), 1, 1, 1)
-    GameTooltip:Show()
-  end)
-  mapButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  mapButton:SetShown(AF.db.showMinimap)
-  self.mapButton = mapButton
-  -- Redraw only visible views once a second; movement accounting is independent.
+  self.mapButton = AF.MinimapButton:Init(self)
   C_Timer.NewTicker(1, function()
     if UI.window and UI.window:IsShown() then UI:Refresh() end
   end)

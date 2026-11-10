@@ -460,3 +460,18 @@ Implemented in source:
 Local validation: Lua 5.1 parsing and three mocked accounting/motion/jump suites passed, along with nine packaging tests. These tests establish selected code behavior, not Forever compatibility. Check the live PR/Actions result for remote validation and merge state.
 
 Addon runtime remains the experimental 0.1.0 baseline, with schema 1 unchanged. No live Forever QA or public release was performed for this infrastructure change. The earlier audit's state-transition, unavailable-speed and incomplete-ledger concerns remain follow-up work. Next priorities remain measurement correctness, persistence robustness and in-client diagnostics before UI polish.
+
+## 17. Owner-requested native UI preview — 2026-11-10
+
+The owner tested the original dashboard and supplied screenshots: the flat custom styling felt foreign to WoW, Russian text appeared as boxes, and the shortcut was a rectangular rune. The owner requested original Blizzard components, Overlord-inspired dark/gold framing, and a playful Fitness-style activity dashboard. Horizontal bars are explicitly acceptable for this iteration; circular rings are deferred. Do not copy Overlord's art or Apple assets.
+
+Implemented in the preview branch (verify the live PR/Actions for its current state):
+
+- Ordinary `BackdropTemplate` dialogs with Blizzard dark backgrounds/gold borders, `UIPanelButtonTemplate`, `UIPanelCloseButton`, native checkboxes/edit boxes and `StatusBar` textures. Font sizing derives from `GameFontHighlight:GetFont()` rather than a hardcoded Latin font file. Achievements also have English/Russian UI text. Actual client typography is still unverified.
+- Three horizontal progress bars: estimated steps, jumps and fictional Murlocalories. Default targets are 10,000 / 100 / 300. `char.activityGoals` and `day.activityGoals` add jump/Murlocalorie targets without a schema break; existing `char.goal`/`day.goal` remain the step targets. Saving validates all targets before applying them, updates today only, and preserves previous recorded targets. Old history is not backfilled with invented additional targets. Step streak/achievement semantics are unchanged.
+- `Minimap.lua` owns a circular masked Blizzard Sprint icon and tracking border. Left click toggles the window, right click opens settings, and dragging follows the minimap perimeter using scale-correct cursor coordinates. `db.minimapAngle` persists its account-wide angle; the existing `db.showMinimap` gains a checkbox. Cursor polling exists only while dragging. The TOC addon-list icon also uses Sprint.
+- Escape closes the window, its header drags it, and opening fits its scale to the available UI dimensions. History and record views refresh only when selected.
+
+Validation: the shared Lua 5.1 gate includes new UI-interaction, minimap-drag and additive goal-upgrade tests, alongside prior movement/accounting and ZIP tests. Mocks cannot verify appearance, Russian glyph rendering, texture availability or client interaction. Hand over the PR's single installable ZIP for owner QA before merging this UI change. No release, tag or version bump is requested.
+
+Client checklist: install preview and `/reload`; ruRU text without boxes; EN/RU switching; all four tabs; saving each goal and invalid input; yesterday's records unchanged; Escape/close/header drag; circular shortcut, four drag quadrants, reload and minimap/UI scale changes; hide/re-show shortcut via `/af settings`; no window toggle on drag release. Confirm the style against the supplied Overlord reference. Rings and original custom decorative artwork remain later design iterations.
