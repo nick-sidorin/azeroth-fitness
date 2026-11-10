@@ -33,6 +33,10 @@ class PackagingTests(unittest.TestCase):
 
     def test_installable_archive_and_reproducible_bytes(self):
         (self.root / 'AGENTS.md').write_text('Internal documentation')
+        standards = self.root / 'docs/standards'
+        standards.mkdir(parents=True)
+        (standards / 'AGENTS.md').write_text('Development-only standards')
+        (standards / 'standards.lock.json').write_text('{}')
         name = 'dist/AzerothFitness-v0.1.0.zip'
         self.run_gate(name)
         output = self.root / name
@@ -63,6 +67,12 @@ class PackagingTests(unittest.TestCase):
     def test_unsafe_path_is_rejected(self):
         self.toc(lambda text: text.replace('Jump.lua', '../Jump.lua'))
         self.run_gate(success=False)
+
+    def test_xml_cannot_silently_omit_dependencies(self):
+        (self.root / 'Extra.xml').write_text('<Ui><Script file="Unlisted.lua"/></Ui>')
+        self.toc(lambda text: text.replace('Jump.lua', 'Jump.lua\nExtra.xml'))
+        result = self.run_gate(success=False)
+        self.assertIn('recursive include', result.stderr)
 
     def test_version_and_client_metadata_are_checked(self):
         for old, new in [('Version: 0.1.0', 'Version: 0.1.1'),

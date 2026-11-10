@@ -89,6 +89,8 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 
 ## Development, builds and releases
 
+Development follows the [pinned shared addon standards](docs/standards/README.md), version 0.1.0 at `f36540efe61eb90671be1359849cbc6d2ddd85c1`, following the No Quest Hints Forever adoption pattern. The [lock](docs/standards/standards.lock.json) records document hashes. `python3 scripts/standards.py check` verifies local integrity offline and runs in CI; updates require a reviewed commit and adoption PR. The addon does not load or package this dependency. See the [alignment audit](docs/STANDARDS_ALIGNMENT.md) for main versus pending UI work and the [release handoff contract](docs/RELEASE_HANDOFF.md).
+
 This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
 
 Run the shared gate locally with Python 3.9+ and Lua 5.1:

@@ -1,6 +1,6 @@
 # Azeroth Fitness UI direction
 
-This records the owner's current design choices. No Quest Hints Forever now has a pinned shared development standard; its native-widget guidance was reviewed for this change. Vendoring that dependency here is a separate task. This document is not evidence of final client rendering.
+This records the owner's current design choices. This repository vendors the same reviewed, pinned shared standard as No Quest Hints Forever; see `docs/standards/README.md` and `docs/STANDARDS_ALIGNMENT.md`. This document is not evidence of final client rendering.
 
 ## Identity and references
 
