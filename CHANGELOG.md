@@ -4,6 +4,7 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Native AddOns settings category sharing one live form with the fallback, plus a localized copyable Issues link
 - Complete dictionaries for all 12 official WoW client locales with automatic game-language selection and English fallback
 - Native portrait-frame window with Blizzard title strip, portrait, close button and right-side icon tabs from Forever's character/professions UI
 - Professions overview/recipe-list textures, native inset panels, three horizontal daily activity bars and separate current-value/target typography
@@ -18,6 +19,7 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Cancel dashboard refresh timers when hidden instead of waking an idle ticker
 - Prevent transparent dialog art from exposing the world through the main window and panels
 - Avoid displaying 28% for 29 out of 100 jumps through floating-point truncation
 - PR and manual preview builds using the `build` check, matching the No Quest Hints Forever workflow

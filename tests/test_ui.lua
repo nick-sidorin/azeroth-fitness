@@ -14,6 +14,7 @@ AF.Say = function() end
 AF.UI:Init()
 local ui = AF.UI
 assert(not ui.window:IsShown())
+assert(#Mock.tickers == 0, "Do not install a timer for a hidden dashboard")
 assert(ui.window.toplevel)
 assert(ui.window.template == "PortraitFrameTemplate" and ui.close == ui.window.CloseButton)
 assert(ui.title == ui.window.TitleContainer.TitleText and ui.window.NineSlice)
@@ -37,6 +38,7 @@ AF:RecordJump()
 ui:Show("today")
 assert(ui.window:IsShown() and ui.pages.today:IsShown() and not ui.pages.settings:IsShown())
 assert(ui.window.nativeShowRuns == 1, "Preserve native OnShow while fitting the window")
+assert(#Mock.tickers == 1 and ui.refreshTicker)
 assert(ui.tabs.today.checked and not ui.tabs.history.checked)
 local history = ui.tabs.history
 history.scripts.OnMouseDown(history, "LeftButton")
@@ -98,6 +100,7 @@ UIParent:SetSize(800, 600)
 ui:Fit()
 assert(ui.window.scale < 1)
 ui.close.scripts.OnClick(ui.close)
+assert(ui.refreshTicker == nil and Mock.timerHandles[1].cancelled)
 local refreshes = 0
 local original = ui.Refresh
 ui.Refresh = function() refreshes = refreshes + 1 end

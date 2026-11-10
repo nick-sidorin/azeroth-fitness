@@ -58,6 +58,10 @@ AF.locales.enUS = {
   AWARD_DESC_marathon = "42.195 km on foot",
   AWARD_couch = "Professional Couch Adventurer",
   AWARD_DESC_couch = "7-day goal streak",
+  REPORT = "Report a problem",
+  SUPPORT_TEXT = "Copy this link and open Issues. Click New issue to report a bug or suggest a feature. Include your Forever build, addon version and reproduction steps.",
+  CLOSE = "Close",
+  SETTINGS_UNAVAILABLE = "Native AddOns settings are unavailable in this client.",
 }
 AF.locales.ruRU = {
   TODAY = "Сегодня",
@@ -115,6 +119,10 @@ AF.locales.ruRU = {
   AWARD_DESC_marathon = "42,195 км пешком",
   AWARD_couch = "Профессиональный диванный герой",
   AWARD_DESC_couch = "Дневная цель 7 дней подряд",
+  REPORT = "Сообщить о проблеме",
+  SUPPORT_TEXT = "Скопируй ссылку и открой Issues. Нажми New issue, чтобы сообщить об ошибке или предложить идею. Укажи сборку Forever, версию аддона и шаги воспроизведения.",
+  CLOSE = "Закрыть",
+  SETTINGS_UNAVAILABLE = "Настройки AddOns недоступны в этом клиенте.",
 }
 AF.locales.enGB = AF.locales.enUS
 

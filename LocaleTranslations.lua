@@ -57,6 +57,10 @@ AF.locales.deDE = {
   AWARD_DESC_marathon = "42,195 km zu Fuß",
   AWARD_couch = "Professioneller Sofa-Abenteurer",
   AWARD_DESC_couch = "Tagesziel an 7 Tagen in Folge",
+  REPORT = "Problem melden",
+  SUPPORT_TEXT = "Kopiere den Link und öffne Issues. Klicke auf New issue, um einen Fehler oder eine Idee zu melden. Nenne Forever-Build, Addon-Version und Schritte zur Reproduktion.",
+  CLOSE = "Schließen",
+  SETTINGS_UNAVAILABLE = "Native AddOns-Einstellungen sind in diesem Client nicht verfügbar.",
 }
 
 AF.locales.frFR = {
@@ -115,6 +119,10 @@ AF.locales.frFR = {
   AWARD_DESC_marathon = "42,195 km à pied",
   AWARD_couch = "Aventurier professionnel du canapé",
   AWARD_DESC_couch = "Objectif atteint 7 jours de suite",
+  REPORT = "Signaler un problème",
+  SUPPORT_TEXT = "Copiez le lien et ouvrez Issues. Cliquez sur New issue pour signaler un bug ou proposer une idée. Indiquez le build Forever, la version et les étapes de reproduction.",
+  CLOSE = "Fermer",
+  SETTINGS_UNAVAILABLE = "Les options natives des extensions sont indisponibles dans ce client.",
 }
 
 AF.locales.esES = {
@@ -173,6 +181,10 @@ AF.locales.esES = {
   AWARD_DESC_marathon = "42,195 km a pie",
   AWARD_couch = "Aventurero profesional de sofá",
   AWARD_DESC_couch = "Objetivo cumplido durante 7 días seguidos",
+  REPORT = "Informar de un problema",
+  SUPPORT_TEXT = "Copia el enlace y abre Issues. Pulsa New issue para informar de un error o proponer una idea. Incluye la compilación de Forever, la versión y los pasos para reproducirlo.",
+  CLOSE = "Cerrar",
+  SETTINGS_UNAVAILABLE = "Las opciones nativas de complementos no están disponibles en este cliente.",
 }
 
 AF.locales.itIT = {
@@ -231,6 +243,10 @@ AF.locales.itIT = {
   AWARD_DESC_marathon = "42,195 km a piedi",
   AWARD_couch = "Avventuriero professionista da divano",
   AWARD_DESC_couch = "Obiettivo raggiunto per 7 giorni consecutivi",
+  REPORT = "Segnala un problema",
+  SUPPORT_TEXT = "Copia il link e apri Issues. Premi New issue per segnalare un problema o proporre un'idea. Indica build di Forever, versione e passaggi per riprodurlo.",
+  CLOSE = "Chiudi",
+  SETTINGS_UNAVAILABLE = "Le opzioni native degli addon non sono disponibili in questo client.",
 }
 
 AF.locales.ptBR = {
@@ -289,6 +305,10 @@ AF.locales.ptBR = {
   AWARD_DESC_marathon = "42,195 km a pé",
   AWARD_couch = "Aventureiro profissional de sofá",
   AWARD_DESC_couch = "Meta concluída por 7 dias seguidos",
+  REPORT = "Relatar um problema",
+  SUPPORT_TEXT = "Copie o link e abra Issues. Clique em New issue para relatar um erro ou sugerir uma ideia. Inclua a compilação do Forever, a versão e os passos para reproduzir.",
+  CLOSE = "Fechar",
+  SETTINGS_UNAVAILABLE = "As opções nativas de addons não estão disponíveis neste cliente.",
 }
 
 AF.locales.koKR = {
@@ -347,6 +367,10 @@ AF.locales.koKR = {
   AWARD_DESC_marathon = "도보로 42.195km",
   AWARD_couch = "전문 소파 모험가",
   AWARD_DESC_couch = "7일 연속 목표 달성",
+  REPORT = "문제 신고",
+  SUPPORT_TEXT = "링크를 복사해 Issues를 여세요. New issue를 눌러 오류를 신고하거나 아이디어를 제안하세요. Forever 빌드, 애드온 버전, 재현 단계를 적어 주세요.",
+  CLOSE = "닫기",
+  SETTINGS_UNAVAILABLE = "이 클라이언트에서는 기본 애드온 설정을 사용할 수 없습니다.",
 }
 
 AF.locales.zhCN = {
@@ -405,6 +429,10 @@ AF.locales.zhCN = {
   AWARD_DESC_marathon = "步行42.195公里",
   AWARD_couch = "职业沙发冒险家",
   AWARD_DESC_couch = "连续7天达成目标",
+  REPORT = "报告问题",
+  SUPPORT_TEXT = "复制链接并打开Issues。点击New issue报告错误或提出建议。请注明Forever版本、插件版本和重现步骤。",
+  CLOSE = "关闭",
+  SETTINGS_UNAVAILABLE = "此客户端无法使用原生插件设置。",
 }
 
 AF.locales.zhTW = {
@@ -463,6 +491,10 @@ AF.locales.zhTW = {
   AWARD_DESC_marathon = "步行42.195公里",
   AWARD_couch = "職業沙發冒險家",
   AWARD_DESC_couch = "連續7天達成目標",
+  REPORT = "回報問題",
+  SUPPORT_TEXT = "複製連結並開啟Issues。點選New issue回報錯誤或提出建議。請註明Forever版本、插件版本和重現步驟。",
+  CLOSE = "關閉",
+  SETTINGS_UNAVAILABLE = "此用戶端無法使用原生插件設定。",
 }
 
 AF.locales.esMX = AF.locales.esES

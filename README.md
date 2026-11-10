@@ -42,6 +42,8 @@ Each day has three goals: estimated steps (default 10,000), jumps (100) and fict
 
 Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
 
+Settings register under **Options → AddOns → Azeroth Fitness** when the native canvas API is available. `/af settings`, the settings side tab and minimap right-click open that same form, using current saved goals/stride/minimap preferences. Clients without that API retain the embedded form; there is no second settings store. **Report a problem** opens a copyable Issues URL with localized instructions. It does not open a browser or submit a report. Dashboard refresh timers exist only while the activity window is visible.
+
 **Azeroth Fitness** is the brand in every language and is never translated. The interface follows `GetLocale()` without a language selector or SavedVariables override. Supported client locales: `enUS`, `enGB`, `ruRU`, `deDE`, `frFR`, `esES`, `esMX`, `itIT`, `ptBR`, `koKR`, `zhCN`, `zhTW`. English and Spanish variants share translations; English is the fallback for unknown locales or missing keys. Numbers and distance units follow the client locale. The localization structure follows No Quest Hints Forever.
 
 Native component use and mock tests do not establish the final appearance in every Forever build. Please check translated text, joke wording, frame sizing, minimap positioning and different UI scales in game. Dictionary completeness is tested; native-speaker and client layout reviews remain useful.

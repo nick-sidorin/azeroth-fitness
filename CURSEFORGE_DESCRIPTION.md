@@ -24,6 +24,8 @@ Activity is stored locally per character and local calendar day using WoW SavedV
 
 Use `/af` to open the dashboard, `/af history` for charts and `/af settings` for daily goals, stride and minimap visibility. The interface automatically follows the game language across all 12 official WoW locales, with English fallback. The name Azeroth Fitness stays the same in every language.
 
+Settings also appear under the game's **Options → AddOns → Azeroth Fitness** where supported. **Report a problem** provides a copyable Issues link; no report is sent automatically.
+
 **[Report a Bug or Suggest a Feature](https://github.com/nick-sidorin/azeroth-fitness/issues)** — click **New issue** for either a problem or an idea. For bugs, include your Forever/addon version and reproduction steps.
 
 **[Source Code](https://github.com/nick-sidorin/azeroth-fitness)** · [Measurement research and credits](https://github.com/nick-sidorin/azeroth-fitness/blob/main/docs/RESEARCH.md)

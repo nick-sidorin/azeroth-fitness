@@ -26,6 +26,8 @@ This records the owner's current design choices. No Quest Hints Forever now has 
 - Labels receive fixed layout space; longer messages wrap. Check the 12 locales in client rather than assuming English lengths apply everywhere. Side tabs use their native localized tooltip behavior.
 - Header drag, Escape closing and all four views remain available. The minimap shortcut is circular, movable along the map edge, and saves its angle. Poll cursor position only during a drag.
 - The game selects the language on load via `GetLocale()`. English and Spanish regional variants share dictionaries; unknown locales fall back to English. Ignore old language overrides without touching activity history.
+- Host the existing settings form in the native AddOns canvas category when its APIs are available; keep that same form embedded only as a capability fallback. Refresh from live SavedVariables on native show/refresh, preserve unsaved edits on repeated opens and never duplicate saved settings state. Native settings also contain the final copyable Issues-link action.
+- Create the dashboard refresh ticker on show and cancel it on hide. Native settings are static until the user acts; they need no activity polling.
 
 ## Verification boundary
 

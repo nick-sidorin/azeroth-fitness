@@ -48,6 +48,10 @@ function Methods:SetPoint(...) self.points[#self.points + 1] = { ... } end
 function Methods:ClearAllPoints() self.points = {} end
 function Methods:SetAllPoints(target) self.allPoints = target end
 function Methods:GetParent() return self.parent end
+function Methods:SetParent(parent) self.parent = parent end
+function Methods:IsVisible()
+  return self.shown and (not self.parent or self.parent:IsVisible())
+end
 function Methods:SetScript(event, callback)
   assert(event ~= "OnClick" or self.kind == "Button" or self.kind == "CheckButton", "OnClick requires a button")
   self.scripts[event] = callback
@@ -115,6 +119,8 @@ function Methods:CreateMaskTexture() return object("Mask", nil, self) end
 function Methods:AddMaskTexture(mask) self.mask = mask end
 function Methods:CreateFontString(name, layer, template) return object("FontString", name, self, template) end
 function Methods:ClearFocus() self.focused = false end
+function Methods:SetFocus() self.focused = true end
+function Methods:HighlightText() self.highlighted = true end
 function Methods:StartMoving() self.moving = true end
 function Methods:StopMovingOrSizing() self.moving = false end
 for _, method in ipairs({ "SetJustifyH", "SetFrameStrata", "SetClampedToScreen", "EnableMouse", "SetMovable",
@@ -136,5 +142,11 @@ Minimap = object("Frame")
 Minimap:SetSize(200, 200)
 Minimap.centerX, Minimap.centerY = 100, 100
 GameTooltip = object("Tooltip")
-C_Timer = { NewTicker = function(_, callback) Mock.tickers[#Mock.tickers + 1] = callback end }
+Mock.timerHandles = {}
+C_Timer = { NewTicker = function(_, callback)
+  local timer = { cancelled = false, Cancel = function(self) self.cancelled = true end }
+  Mock.timerHandles[#Mock.timerHandles + 1] = timer
+  Mock.tickers[#Mock.tickers + 1] = function() if not timer.cancelled then callback() end end
+  return timer
+end }
 return Mock

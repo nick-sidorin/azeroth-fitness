@@ -78,6 +78,15 @@ function UI:Fit()
     UIParent:GetHeight() * 0.94 / (H + 24)))
 end
 
+function UI:StartRefresh()
+  if self.refreshTicker then return end
+  self.refreshTicker = C_Timer.NewTicker(1, function() self:Refresh() end)
+end
+
+function UI:StopRefresh()
+  if self.refreshTicker then self.refreshTicker:Cancel(); self.refreshTicker = nil end
+end
+
 function UI:Build()
   local window = CreateFrame("Frame", "AzerothFitnessWindow", UIParent, "PortraitFrameTemplate")
   self.window = window
@@ -137,7 +146,8 @@ function UI:Build()
   self:BuildHistory()
   self:BuildRecords()
   self:BuildSettings()
-  window:HookScript("OnShow", function() UI:Fit() end)
+  window:HookScript("OnShow", function() UI:Fit(); UI:StartRefresh() end)
+  window:HookScript("OnHide", function() UI:StopRefresh() end)
 end
 
 function UI:BuildToday()
@@ -260,6 +270,53 @@ function UI:BuildSettings()
   self.dateNote = line(options, 16, -68, 525, AF:T("LOCAL_DATE"), 12, C.muted)
   self.estimateNote = line(options, 16, -104, 525, AF:T("ESTIMATE"), 11, C.muted)
   self.estimateNote:SetHeight(32)
+  self.report = button(options, AF:T("REPORT"), 16, -161, 240, 26, function() UI:ShowSupportLink() end)
+end
+
+function UI:LoadSettings()
+  if not AF.char then return end
+  self.goalInput:SetText(tostring(AF.char.goal))
+  self.jumpGoalInput:SetText(tostring(AF.char.activityGoals.jumps))
+  self.murloGoalInput:SetText(tostring(AF.char.activityGoals.murlos))
+  self.strideInput:SetText(AF:FormatDecimal(AF:Stride("run"), 2))
+  self.minimapToggle:SetChecked(AF.db.showMinimap)
+end
+
+function UI:RegisterNativeSettings()
+  if self.settingsCategory then return end
+  if not Settings or type(Settings.RegisterCanvasLayoutCategory) ~= "function"
+      or type(Settings.RegisterAddOnCategory) ~= "function" or type(Settings.OpenToCategory) ~= "function" then return end
+  -- One form is hosted either by native Settings or by the ordinary fallback page.
+  local canvas = self.pages.settings
+  canvas:Hide()
+  canvas:SetParent(UIParent)
+  canvas:ClearAllPoints()
+  canvas:HookScript("OnShow", function() UI:LoadSettings() end)
+  canvas.refresh = function() UI:LoadSettings() end
+  self.settingsCategory = Settings.RegisterCanvasLayoutCategory(canvas, AF.NAME)
+  Settings.RegisterAddOnCategory(self.settingsCategory)
+end
+
+function UI:ShowSupportLink()
+  local url = "https://github.com/nick-sidorin/azeroth-fitness/issues"
+  if type(StaticPopupDialogs) ~= "table" or type(StaticPopup_Show) ~= "function" then
+    AF:Say(AF:T("SUPPORT_TEXT") .. " " .. url)
+    return false
+  end
+  local key = "AZEROTH_FITNESS_PROJECT_LINK"
+  if not StaticPopupDialogs[key] then
+    StaticPopupDialogs[key] = { text = AF:T("SUPPORT_TEXT"), button1 = AF:T("CLOSE"),
+      hasEditBox = true, editBoxWidth = 440, maxLetters = 0, timeout = 0,
+      whileDead = true, hideOnEscape = true,
+      OnShow = function(dialog)
+        local box = type(dialog.GetEditBox) == "function" and dialog:GetEditBox() or dialog.editBox or dialog.EditBox
+        if box then box:SetText(url); box:SetFocus(); box:HighlightText() end
+      end,
+      EditBoxOnEscapePressed = function(box) box:GetParent():Hide() end,
+      EditBoxOnEnterPressed = function(box) box:GetParent():Hide() end,
+    }
+  end
+  return StaticPopup_Show(key) ~= nil
 end
 
 function UI:Refresh()
@@ -332,16 +389,21 @@ function UI:RefreshRecords()
 end
 
 function UI:Show(page)
-  self.page = page or self.page or "today"
+  local target = page or self.page or "today"
+  if target == "settings" and not self.settingsCategory then self:RegisterNativeSettings() end
+  if target == "settings" and self.settingsCategory then
+    local canvas = self.pages.settings
+    if canvas:IsVisible() then return end
+    local ok = pcall(Settings.OpenToCategory, self.settingsCategory:GetID())
+    if ok then self.window:Hide() else AF:Say(AF:T("SETTINGS_UNAVAILABLE")) end
+    return
+  end
+  self.page = target
   if self.page == "settings" then
-    self.goalInput:SetText(tostring(AF.char.goal))
-    self.jumpGoalInput:SetText(tostring(AF.char.activityGoals.jumps))
-    self.murloGoalInput:SetText(tostring(AF.char.activityGoals.murlos))
-    self.strideInput:SetText(AF:FormatDecimal(AF:Stride("run"), 2))
-    self.minimapToggle:SetChecked(AF.db.showMinimap)
+    self:LoadSettings()
   end
   for id, frame in pairs(self.pages) do
-    frame:SetShown(id == self.page)
+    if id ~= "settings" or not self.settingsCategory then frame:SetShown(id == self.page) end
     self.tabs[id]:SetChecked(id == self.page)
   end
   self.window:Show()
@@ -354,7 +416,5 @@ function UI:Init()
   self.range = 7
   self:Build()
   self.mapButton = AF.MinimapButton:Init(self)
-  C_Timer.NewTicker(1, function()
-    if UI.window and UI.window:IsShown() then UI:Refresh() end
-  end)
+  self:RegisterNativeSettings()
 end
