@@ -21,6 +21,10 @@ Reviewed **2026-11-10** against `wow-addon-standards` **0.1.0**, commit `f36540e
 
 ## Conditional rules
 
+### Repository enforcement observed on 2026-11-10
+
+The active main ruleset `Protect main — PR + CI` (ID `26893445`) requires PRs, squash-only merges, resolved review threads, linear history, and disallows deletion/force pushes without bypass actors. Its `required_status_checks` rule has an **empty** `required_status_checks` list: `build` is not currently enforced. Repository settings remain owner-managed as requested; the owner must add `build` there. Agent merges still require independently verified green final-head CI. The separate branch-protection endpoint returns 403 to the integration; the public ruleset detail above was readable. No repository settings were changed.
+
 There is no onboarding/preset modal, personal CVar effect, settings reset, native-controller implementation, shipped feature-version map or New-setting badge. Their conditional safety rules remain mandatory if introduced; importing the dependency does not authorize inventing those product features. There has been no public addon release. Metadata-based upgrade notices and an exact client/build verification record are gates for the first actual version upgrade, not claims about this unchanged-version preview.
 
 ## Review/merge order
