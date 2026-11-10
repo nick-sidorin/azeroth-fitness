@@ -15,7 +15,7 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 - Jumps and fictional Murlocalories
 - Seven humorous achievements
 - All 12 official WoW client locales, selected automatically from the game language
-- WoW-native gold-framed dashboard, horizontal activity progress bars and locale-aware client fonts
+- Native portrait-frame dashboard with right-side icon tabs, horizontal activity bars and client fonts
 - Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
 
 ## Installation
@@ -36,7 +36,7 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 
 ## Dashboard and daily goals
 
-The dashboard uses an opaque base with tiled Blizzard marble texture, gold borders, native tabs/buttons, status bars and the client's own font face. A framed header and separate typography for current values and targets give it a compact adventure-ledger presentation. The owner supplied Overlord as a visual reference for a dark, gold-framed WoW presentation, and iPhone Fitness as a reference for daily activity goals. No Overlord or Apple art is included. This preview uses horizontal bars; circular activity rings remain future work. See [UI design decisions](docs/UI_DESIGN.md).
+The dashboard inherits the same `PortraitFrameTemplate` used by Forever's professions window: native portrait, title strip, nine-slice border and close button. Its right-side icon tabs use `LargeSideTabButtonTemplate`, as in the character/professions windows. Inner frames use the professions recipe-list texture at its original tint, with native rock/marble fallback. The Fitness-inspired activity bars remain addon-owned content. No Overlord or Apple art is included; circular activity rings remain future work. See [UI design decisions](docs/UI_DESIGN.md) and the [native-source/API research](docs/NATIVE_UI_RESEARCH.md).
 
 Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
 
@@ -62,7 +62,7 @@ Data is saved locally as AzerothFitnessDB via the WoW SavedVariables system, key
 
 ## Forever compatibility
 
-Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. **The engine and UI have not yet been smoke-tested in a live Forever game client**, so function availability, jump hooks, movement direction signs and combat secret-value handling remain validation tasks.
+Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The current portrait-frame redesign and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
 
 ## Research and credits
 

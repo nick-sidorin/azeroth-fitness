@@ -16,7 +16,7 @@ An experimental fitness tracker for WoW: Forever: estimated steps, daily goals, 
 - Browse 7-day and 30-day activity charts, lifetime totals, best day and goal streak.
 - Track walking, running, backpedaling, strafing, swimming and jumps.
 - Earn seven playful achievements and burn entirely fictional Murlocalories.
-- Use the textured, gold-framed dashboard in your game's language, with horizontal progress bars, a draggable round minimap shortcut and `/af` commands.
+- Use the native portrait-frame dashboard in your game's language, with side tabs, horizontal progress bars, a draggable round minimap shortcut and `/af` commands.
 
 **Experimental v0.1.0: validation in WoW: Forever is still required.** Steps are distance-based estimates, not observed animation footfalls. Default stride lengths are coarse estimates; jump detection and travel classification have known limitations. Murlocalories have no relationship to real calories or health measurements.
 

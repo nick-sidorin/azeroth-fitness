@@ -2,7 +2,7 @@ local _, AF = ...
 local UI = {}
 AF.UI = UI
 
-local W, H = 600, 650
+local W, H = 600, 590
 local C = {
   gold = { 0.93, 0.78, 0.47 }, white = { 0.96, 0.92, 0.83 }, muted = { 0.67, 0.63, 0.53 },
   steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 },
@@ -24,29 +24,26 @@ local function line(parent, x, y, width, value, size, tint)
   fs:SetWidth(width)
   return fs
 end
-local function stone(parent, width, height, shade)
-  -- The dialog background has transparent pixels. Guarantee opacity separately.
-  local base = parent:CreateTexture(nil, "BACKGROUND", nil, -2)
-  base:SetPoint("TOPLEFT", 5, -5)
-  base:SetPoint("BOTTOMRIGHT", -5, 5)
-  base:SetColorTexture(0.055, 0.042, 0.028, 1)
-  local grain = parent:CreateTexture(nil, "BACKGROUND", nil, -1)
-  grain:SetAllPoints(base)
-  grain:SetTexture("Interface\\FrameGeneral\\UI-Background-Marble")
-  grain:SetHorizTile(true)
-  grain:SetVertTile(true)
-  grain:SetTexCoord(0, width / 256, 0, height / 256)
-  grain:SetVertexColor(shade, shade * 0.83, shade * 0.62, 1)
-  parent.surface, parent.grain = base, grain
+local function nativeBackground(parent, atlas)
+  -- Preserve the template's authored rock/marble if an optional atlas is absent.
+  local background = parent.Bg
+  local base = parent:CreateTexture(nil, "BACKGROUND", nil, -8)
+  base:SetAllPoints(background)
+  base:SetColorTexture(0.08, 0.065, 0.04, 1)
+  parent.surface = base
+  if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then
+    background:SetAtlas(atlas, false, nil, true)
+    background:SetHorizTile(false)
+    background:SetVertTile(false)
+    return true
+  end
+  return false
 end
 local function panel(parent, x, y, width, height)
-  local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+  local frame = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
   frame:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
   frame:SetSize(width, height)
-  frame:SetBackdrop({ edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 } })
-  stone(frame, width, height, 0.48)
-  frame:SetBackdropBorderColor(0.47, 0.38, 0.22)
+  nativeBackground(frame, "Professions-background-summarylist")
   return frame
 end
 local function button(parent, label, x, y, width, height, click)
@@ -59,7 +56,10 @@ local function button(parent, label, x, y, width, height, click)
   return b
 end
 local function bar(parent, x, y, width, height, tint)
-  local surround = panel(parent, x, y, width, height)
+  local surround = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+  surround:SetPoint("TOPLEFT", x, y)
+  surround:SetSize(width, height)
+  surround:SetBackdrop({ edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12 })
   local status = CreateFrame("StatusBar", nil, surround)
   status:SetPoint("TOPLEFT", 4, -4)
   status:SetPoint("BOTTOMRIGHT", -4, 4)
@@ -73,72 +73,71 @@ local function bar(parent, x, y, width, height, tint)
 end
 
 function UI:Fit()
-  self.window:SetScale(math.min(1, UIParent:GetWidth() * 0.94 / W, UIParent:GetHeight() * 0.94 / H))
+  -- The portrait and native tabs extend outside the main frame's rectangle.
+  self.window:SetScale(math.min(1, UIParent:GetWidth() * 0.94 / (W + self.sideWidth + 20),
+    UIParent:GetHeight() * 0.94 / (H + 24)))
 end
 
 function UI:Build()
-  local window = CreateFrame("Frame", "AzerothFitnessWindow", UIParent, "BackdropTemplate")
+  local window = CreateFrame("Frame", "AzerothFitnessWindow", UIParent, "PortraitFrameTemplate")
   self.window = window
   window:Hide()
   window:SetSize(W, H)
   window:SetPoint("CENTER")
   window:SetFrameStrata("DIALOG")
+  window:SetToplevel(true)
   window:SetClampedToScreen(true)
   window:EnableMouse(true)
   window:SetMovable(true)
-  window:SetBackdrop({ edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", edgeSize = 32,
-    insets = { left = 10, right = 10, top = 10, bottom = 10 } })
-  stone(window, W, H, 0.70)
-  local header = panel(window, 12, -12, 576, 62)
-  header:SetBackdropBorderColor(0.60, 0.46, 0.23)
+  window:SetTitle(AF:T("TITLE"))
+  window:SetPortraitToAsset(AF.ACTIVITY_ICON)
+  self.title, self.close = window.TitleContainer.TitleText, window.CloseButton
+  if nativeBackground(window, "Profession-Background-Overview") then window.TopTileStreaks:Hide() end
+  -- The native close script calls this hook; no UIPanelWindows registration needed.
+  window.onCloseCallback = function() window:Hide(); return false end
   local drag = CreateFrame("Frame", nil, window)
-  drag:SetPoint("TOPLEFT", 12, -8)
-  drag:SetPoint("TOPRIGHT", -42, -8)
-  drag:SetHeight(64)
+  drag:SetPoint("TOPLEFT", 60, -1)
+  drag:SetPoint("TOPRIGHT", -30, -1)
+  drag:SetHeight(22)
   drag:EnableMouse(true)
   drag:RegisterForDrag("LeftButton")
   drag:SetScript("OnDragStart", function() window:StartMoving() end)
   drag:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
-  local emblem = drag:CreateTexture(nil, "ARTWORK")
-  emblem:SetSize(34, 34)
-  emblem:SetPoint("TOPLEFT", 15, -13)
-  emblem:SetTexture(AF.ACTIVITY_ICON)
-  local mask = drag:CreateMaskTexture()
-  mask:SetAllPoints(emblem)
-  mask:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-  emblem:AddMaskTexture(mask)
-  local rim = drag:CreateTexture(nil, "OVERLAY")
-  rim:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-  rim:SetSize(90, 90)
-  rim:SetPoint("TOPLEFT", 3, -5)
-  self.title = line(drag, 76, -10, 404, AF:T("TITLE"), 23, C.gold)
-  self.subtitle = line(drag, 77, -38, 404, AF:T("TAGLINE"), 11, C.muted)
+  self.headerDrag = drag
+  self.subtitle = line(window, 64, -34, 490, AF:T("TAGLINE"), 11, C.muted)
   self.subtitle:SetHeight(22)
-  self.close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
-  self.close:SetPoint("TOPRIGHT", -6, -6)
-  self.close:SetScript("OnClick", function() window:Hide() end)
   table.insert(UISpecialFrames, "AzerothFitnessWindow")
 
   self.tabs, self.pages = {}, {}
-  window.minTabWidth, window.maxTabWidth, window.tabPadding = 130, 130, 12
-  for i, id in ipairs({ "today", "history", "records", "settings" }) do
-    local tab = CreateFrame("Button", nil, window, "PanelTopTabButtonTemplate")
-    tab:SetPoint("TOPLEFT", 24 + (i - 1) * 139, -79)
-    tab:SetSize(130, 32)
-    tab:SetText(AF:T(string.upper(id)))
-    tab:SetScript("OnClick", function() UI:Show(id) end)
-    function tab:SetLabel(value) self:SetText(value) end
+  self.sideWidth = 0
+  local icons = { today = AF.ACTIVITY_ICON, history = "Interface\\Icons\\INV_Misc_Book_09",
+    records = "Interface\\Icons\\INV_Misc_Coin_01", settings = "Interface\\Icons\\Trade_Engineering" }
+  local previousTab
+  for _, id in ipairs({ "today", "history", "records", "settings" }) do
+    local tab = CreateFrame("Frame", nil, window, "LargeSideTabButtonTemplate")
+    tab:EnableMouse(true)
+    if previousTab then tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -2)
+    else tab:SetPoint("TOPLEFT", window, "TOPRIGHT", 0, -60) end
+    -- The template sizes its art/mask and handles hover and press visuals.
+    tab.Icon:SetTexture(icons[id])
+    tab.tooltipText = AF:T(string.upper(id))
+    tab:SetFillToInterior(true)
+    tab:SetCustomOnMouseUpHandler(function(_, mouseButton, upInside)
+      if mouseButton == "LeftButton" and upInside and UI.page ~= id then UI:Show(id) end
+    end)
+    self.sideWidth = math.max(self.sideWidth, tab:GetWidth())
+    previousTab = tab
     self.tabs[id] = tab
     local page = CreateFrame("Frame", nil, window)
-    page:SetPoint("TOPLEFT", 20, -115)
-    page:SetPoint("BOTTOMRIGHT", -20, 20)
+    page:SetPoint("TOPLEFT", 20, -64)
+    page:SetPoint("BOTTOMRIGHT", -20, 12)
     self.pages[id] = page
   end
   self:BuildToday()
   self:BuildHistory()
   self:BuildRecords()
   self:BuildSettings()
-  window:SetScript("OnShow", function() UI:Fit() end)
+  window:HookScript("OnShow", function() UI:Fit() end)
 end
 
 function UI:BuildToday()
@@ -343,8 +342,7 @@ function UI:Show(page)
   end
   for id, frame in pairs(self.pages) do
     frame:SetShown(id == self.page)
-    if id == self.page then PanelTemplates_SelectTab(self.tabs[id])
-    else PanelTemplates_DeselectTab(self.tabs[id]) end
+    self.tabs[id]:SetChecked(id == self.page)
   end
   self.window:Show()
   self:Refresh()

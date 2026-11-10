@@ -5,8 +5,9 @@ Versions follow Semantic Versioning.
 ## [Unreleased]
 ### Added
 - Complete dictionaries for all 12 official WoW client locales with automatic game-language selection and English fallback
-- Opaque tiled native stone surfaces, framed header, Blizzard top tabs and clearer current-value/target typography
-- WoW-native gold-framed dashboard with three horizontal daily activity bars, native buttons and client font faces
+- Native portrait-frame window with Blizzard title strip, portrait, close button and right-side icon tabs from Forever's character/professions UI
+- Professions overview/recipe-list textures, native inset panels, three horizontal daily activity bars and separate current-value/target typography
+- Source/API research mapping the selected templates, atlases and inherited callbacks
 - Separate configurable daily jump and Murlocalorie targets, preserving existing step/history data
 - Masked circular Sprint minimap shortcut with drag positioning, saved angle, right-click settings and visibility control
 - Sprint addon-list icon, localized achievement text, Escape closing and adaptive window scaling
