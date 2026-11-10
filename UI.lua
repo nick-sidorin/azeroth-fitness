@@ -393,7 +393,7 @@ function UI:Show(page)
   if target == "settings" and not self.settingsCategory then self:RegisterNativeSettings() end
   if target == "settings" and self.settingsCategory then
     local canvas = self.pages.settings
-    if canvas:IsVisible() then return end
+    if canvas:IsVisible() then self.window:Hide(); return end
     local ok = pcall(Settings.OpenToCategory, self.settingsCategory:GetID())
     if ok then self.window:Hide() else AF:Say(AF:T("SETTINGS_UNAVAILABLE")) end
     return

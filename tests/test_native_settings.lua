@@ -45,6 +45,10 @@ assert(not ui.window:IsShown() and runningTimer.cancelled and ui.refreshTicker =
 ui.goalInput:SetText("333")
 ui:Show("settings")
 assert(opens == 1 and ui.goalInput:GetText() == "333", "Repeated open must preserve the same live form's draft")
+ui:Show("today")
+local overlayTimer = ui.refreshTicker
+ui:Show("settings")
+assert(not ui.window:IsShown() and overlayTimer.cancelled and ui.goalInput:GetText() == "333")
 ui:RegisterNativeSettings()
 assert(registrations == 1)
 
