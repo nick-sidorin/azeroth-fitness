@@ -40,9 +40,7 @@ jobs:
 
       - name: Install Lua 5.1
         if: steps.request.outputs.requested == 'true'
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lua5.1
+        run: bash scripts/install_lua51.sh "$RUNNER_TEMP/azeroth-fitness-lua"
 
       - name: Test and validate requested version
         if: steps.request.outputs.requested == 'true'

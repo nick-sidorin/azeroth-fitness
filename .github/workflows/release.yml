@@ -29,9 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Lua 5.1
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lua5.1
+        run: bash scripts/install_lua51.sh "$RUNNER_TEMP/azeroth-fitness-lua"
 
       - name: Regression, Lua syntax and manifest gates
         run: bash scripts/run_ci.sh

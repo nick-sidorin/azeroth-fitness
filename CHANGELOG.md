@@ -29,7 +29,7 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
-- Pin build/publisher runners to Ubuntu 24.04 after the ubuntu-latest rollout selected a 26.04 image whose package installation failed resolving security.ubuntu.com
+- Pin build/publisher runners to Ubuntu 24.04 and build the SHA-256-verified official Lua 5.1.5 source instead of depending on failing Ubuntu package mirrors
 - Reset atlas UVs explicitly to prevent cropped/magnified achievement-alert shields and icon frames
 - Match native icon/shield subframe geometry and centered two-line alert names; keep atlas artwork at authored dimensions
 - Replace dark earned descriptions with white shadowed text, add card/list borders and use a laurel-shield sidebar icon
