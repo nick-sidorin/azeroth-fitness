@@ -20,7 +20,8 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
       filename: ${{ steps.version.outputs.filename }}
@@ -93,7 +94,8 @@ jobs:
   github-release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:

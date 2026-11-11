@@ -100,6 +100,8 @@ Development follows the [pinned shared addon standards](docs/standards/README.md
 
 This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
 
+Build and publisher jobs use a pinned Ubuntu 24.04 runner image to keep the environment stable across `ubuntu-latest` rollouts.
+
 Run the shared gate locally with Python 3.9+ and Lua 5.1:
 
 ```sh

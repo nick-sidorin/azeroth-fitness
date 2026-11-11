@@ -17,7 +17,8 @@ concurrency:
 jobs:
   publish:
     if: github.repository == 'nick-sidorin/azeroth-fitness' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
