@@ -5,9 +5,17 @@ install_root="${1:?Usage: install_lua51.sh ABSOLUTE_INSTALL_DIRECTORY}"
 [[ "$install_root" = /* ]] || { echo 'Install directory must be absolute' >&2; exit 1; }
 build_root="$(mktemp -d)"
 trap 'rm -rf "$build_root"' EXIT
-curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' \
-  --connect-timeout 15 --max-time 90 --retry 2 \
-  https://www.lua.org/ftp/lua-5.1.5.tar.gz -o "$build_root/lua.tar.gz"
+source_downloaded=false
+# BLFS mirrors the identical release archive; the same digest is mandatory for either host.
+for source_url in https://www.lua.org/ftp/lua-5.1.5.tar.gz \
+    https://ftp.osuosl.org/pub/blfs/conglomeration/lua/lua-5.1.5.tar.gz; do
+  if curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' \
+      --connect-timeout 10 --max-time 30 --retry 1 --retry-all-errors --retry-max-time 30 \
+      "$source_url" -o "$build_root/lua.tar.gz"; then
+    source_downloaded=true; break
+  fi
+done
+[[ "$source_downloaded" == true ]] || { echo 'Unable to download the Lua source archive' >&2; exit 1; }
 printf '%s  %s\n' 2640fc56a795f29d28ef15e13c34a47e223960b0240e8cb0a82d9b0738695333 \
   "$build_root/lua.tar.gz" | sha256sum --check --strict
 tar -xzf "$build_root/lua.tar.gz" -C "$build_root"

@@ -31,6 +31,7 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Retry Lua source-download transport errors and fall back to a digest-identical BLFS mirror when lua.org is unavailable
 - Center points across the full shield texture in both alerts and cards, removing fixed per-digit offsets
 - Restore visible colored/desaturated achievement parchment with translucent shading, thin native borders and aligned card text
 - Preserve the approved earned toast and center only its digits on the inset shield artwork; add the total-points bar’s textured track

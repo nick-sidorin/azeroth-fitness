@@ -100,7 +100,7 @@ Development follows the [pinned shared addon standards](docs/standards/README.md
 
 This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
 
-Build and publisher jobs use a pinned Ubuntu 24.04 runner image. `scripts/install_lua51.sh` compiles Lua 5.1.5 from the official HTTPS archive after verifying its SHA-256, using the runner’s C compiler and make; no APT mirror is required. The script takes an absolute install directory, and local contributors may instead use their existing Lua 5.1 installation.
+Build and publisher jobs use a pinned Ubuntu 24.04 runner image. `scripts/install_lua51.sh` compiles Lua 5.1.5 from the official HTTPS archive (with a BLFS mirror fallback) after verifying the same pinned SHA-256, using the runner’s C compiler and make; no APT mirror is required. The script takes an absolute install directory, and local contributors may instead use their existing Lua 5.1 installation.
 
 Run the shared gate locally with Python 3.9+ and Lua 5.1:
 
