@@ -56,7 +56,28 @@ local function shield(parent, alert)
     image:SetTexture(ART .. "UI-Achievement-Shields"); image:SetTexCoord(0, 0.5, 0, 0.5)
   end
   local points = label(holder, 42, 18, "CENTER", "CENTER", 3, -2, "GameFontNormal")
+  if alert then
+    -- Center on the shield artwork, whose top inset differs from its container.
+    points:ClearAllPoints(); points:SetPoint("CENTER", image, "CENTER", 3, 0)
+  end
   return image, points, holder
+end
+local function achievementCard(parent, width, height, y)
+  -- The same tooltip-border artwork frames Blizzard's own achievement cards.
+  local row = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+  row:SetSize(width, height); row:SetPoint("TOPLEFT", 0, y)
+  row:SetBackdrop({ edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12 })
+  row.surface = row:CreateTexture(nil, "BACKGROUND", nil, -8)
+  row.surface:SetPoint("TOPLEFT", 4, -4); row.surface:SetPoint("BOTTOMRIGHT", -4, 4)
+  row.surface:SetColorTexture(0.06, 0.045, 0.025, 1)
+  row.background = texture(row, ART .. "UI-Achievement-Parchment-Horizontal", width - 8, height - 8,
+    "TOPLEFT", "TOPLEFT", 4, -4, "BACKGROUND")
+  -- Crop at approximately native texel density instead of flattening a tall pane atlas.
+  row.background:SetTexCoord(0, 1, 1 - (height - 8) / 256, 1)
+  row.shade = texture(row, nil, width - 8, height - 8, "TOPLEFT", "TOPLEFT", 4, -4, "BACKGROUND")
+  row.titlebar = texture(row, ART .. "UI-Achievement-Borders", width - 12, 24,
+    "TOPLEFT", "TOPLEFT", 6, -5)
+  return row
 end
 function A:Build(page)
   self.pointsFrame = inset(page, 560, 38, 0, -4)
@@ -64,6 +85,9 @@ function A:Build(page)
   self.pointsBar:SetPoint("TOPLEFT", 10, -9); self.pointsBar:SetSize(540, 20)
   self.pointsBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
   self.pointsBar:SetStatusBarColor(0.76, 0.55, 0.16)
+  self.pointsTrack = texture(self.pointsBar, "Interface\\TargetingFrame\\UI-StatusBar", 540, 20,
+    "CENTER", "CENTER", 0, 0, "BACKGROUND")
+  self.pointsTrack:SetVertexColor(0.20, 0.16, 0.08, 1)
   self.heading = label(self.pointsBar, 530, 20, "CENTER", "CENTER", 0, 0)
   self.listFrame = inset(page, 560, 452, 0, -56)
   local scroll = CreateFrame("ScrollFrame", nil, self.listFrame)
@@ -87,14 +111,13 @@ function A:Build(page)
     scrollbar:SetScrollPercentage(value / math.max(1, self.maximum), true)
   end)
   for i = 1, #AF.ACHIEVEMENTS do
-    local row = inset(content, 524, 104, 0, -(i - 1) * 112)
-    row.background = row.Bg
-    row.titlebar = texture(row, nil, 512, 26, "TOPLEFT", "TOPLEFT", 6, -6)
+    local row = achievementCard(content, 524, 104, -(i - 1) * 112)
     row.icon, row.iconFrame, row.iconHolder = icon(row, 60, 60, "LEFT", "LEFT", 10, 0)
     row.shield, row.scoreText, row.shieldHolder = shield(row, false)
-    row.title = label(row, 356, 24, "TOPLEFT", "TOPLEFT", 82, -10)
+    row.title = label(row, 356, 24, "TOPLEFT", "TOPLEFT", 82, -7, "GameFontHighlightMedium")
     row.description = label(row, 356, 34, "TOPLEFT", "TOPLEFT", 82, -36)
     row.date = label(row, 356, 18, "BOTTOMLEFT", "BOTTOMLEFT", 82, 10, "GameFontHighlightSmall")
+    row.title:SetJustifyH("LEFT"); row.description:SetJustifyH("LEFT"); row.date:SetJustifyH("LEFT")
     self.rows[i] = row
   end
 end
@@ -108,8 +131,17 @@ function A:Refresh()
     local row, award = self.rows[i], entry.award
     row.awardID, row.earned = award.id, entry.earned
     local shade = entry.earned and 1 or 0.65
-    row.background:SetVertexColor(shade, shade, shade)
-    row.titlebar:SetColorTexture(entry.earned and 0.65 or 0.3, entry.earned and 0.42 or 0.3, entry.earned and 0.12 or 0.3, entry.earned and 0.18 or 0.08)
+    row.background:SetTexture(ART .. (entry.earned and "UI-Achievement-Parchment-Horizontal"
+      or "UI-Achievement-Parchment-Horizontal-Desaturated"))
+    row.shade:SetColorTexture(0, 0, 0, entry.earned and 0.40 or 0.52)
+    if entry.earned then
+      row.titlebar:SetTexCoord(0, 0.9765625, 0.66015625, 0.73828125)
+      row:SetBackdropBorderColor(0.72, 0.55, 0.28, 1)
+    else
+      row.titlebar:SetTexCoord(0, 1, 0.91796875, 0.99609375)
+      row:SetBackdropBorderColor(0.42, 0.39, 0.32, 1)
+    end
+    row.titlebar:SetVertexColor(1, 1, 1, 0.65)
     row.icon:SetTexture(award.icon)
     for _, t in ipairs({ row.icon, row.iconFrame, row.shield }) do t:SetDesaturated(not entry.earned) end
     row.scoreText:SetText(award.points)

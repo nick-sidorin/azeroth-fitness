@@ -29,6 +29,8 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Restore visible colored/desaturated achievement parchment with translucent shading, thin native borders and aligned card text
+- Preserve the approved earned toast and center only its digits on the inset shield artwork; add the total-points bar’s textured track
 - Pin build/publisher runners to Ubuntu 24.04 and build the SHA-256-verified official Lua 5.1.5 source instead of depending on failing Ubuntu package mirrors
 - Reset atlas UVs explicitly to prevent cropped/magnified achievement-alert shields and icon frames
 - Match native icon/shield subframe geometry and centered two-line alert names; keep atlas artwork at authored dimensions

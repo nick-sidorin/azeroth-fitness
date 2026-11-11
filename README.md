@@ -51,7 +51,7 @@ Native component use and mock tests do not establish the final appearance in eve
 
 ## Achievements
 
-The award-icon tab contains only achievements: eight framed cards worth 10 points each, a gold total-points bar, white earned text and desaturated locked icons. Earned cards appear first. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
+The award-icon tab contains only achievements: eight parchment-textured cards worth 10 points each, thin native borders, a gold total-points bar, white earned text and desaturated locked icons. Earned cards appear first. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
 
 **First Steps** unlocks after 50 estimated lifetime steps. Newly earned achievements display a queued Blizzard-style notification at the lower center of the screen, even when the dashboard is closed. These are addon achievements, separate from Blizzard character achievement points. There are no partial-progress notifications. For testing, `/af reset` opens a native confirmation before deleting this character’s statistics; Cancel/Escape or unavailable confirmation leaves them intact.
 

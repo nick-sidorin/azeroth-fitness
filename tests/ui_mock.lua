@@ -94,6 +94,7 @@ function Methods:IsShown() return self.shown end
 function Methods:SetText(value) self.value = value end
 function Methods:GetText() return self.value end
 function Methods:SetFont(face, size, flags) self.font, self.fontSize, self.fontFlags = face, size, flags end
+function Methods:SetJustifyH(value) self.justifyH = value end
 function Methods:SetJustifyV(value) self.justifyV = value end
 function Methods:SetShadowColor(...) self.shadowColor = { ... } end
 function Methods:SetShadowOffset(...) self.shadowOffset = { ... } end
@@ -145,7 +146,7 @@ function Methods:SetFocus() self.focused = true end
 function Methods:HighlightText() self.highlighted = true end
 function Methods:StartMoving() self.moving = true end
 function Methods:StopMovingOrSizing() self.moving = false end
-for _, method in ipairs({ "SetJustifyH", "SetFrameStrata", "SetClampedToScreen", "EnableMouse", "SetMovable",
+for _, method in ipairs({ "SetFrameStrata", "SetClampedToScreen", "EnableMouse", "SetMovable",
     "RegisterForDrag", "RegisterForClicks", "SetAutoFocus", "SetHighlightTexture", "SetOwner", "AddLine" }) do
   Methods[method] = function() end
 end
