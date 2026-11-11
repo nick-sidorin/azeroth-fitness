@@ -94,11 +94,17 @@ function Methods:IsShown() return self.shown end
 function Methods:SetText(value) self.value = value end
 function Methods:GetText() return self.value end
 function Methods:SetFont(face, size, flags) self.font, self.fontSize, self.fontFlags = face, size, flags end
+function Methods:SetJustifyV(value) self.justifyV = value end
+function Methods:SetShadowColor(...) self.shadowColor = { ... } end
+function Methods:SetShadowOffset(...) self.shadowOffset = { ... } end
+function Methods:SetMaxLines(value) self.maxLines = value end
 function Methods:SetFontObject(value) self.fontObject = value end
 function Methods:SetTexture(path) self.texture = path; return true end
-function Methods:SetAtlas(atlas, useSize)
+function Methods:SetAtlas(atlas, useSize, filterMode, resetTexCoords)
   local info = assert(C_Texture.GetAtlasInfo(atlas), "Unknown atlas: " .. atlas)
   self.atlas, self.texture = atlas, nil
+  self.filterMode, self.resetTexCoords = filterMode, resetTexCoords
+  if resetTexCoords then self.texCoord = info.texCoord or { 0, 1, 0, 1 } end
   if useSize then self:SetSize(info.width, info.height) end
 end
 function Methods:SetTitle(title) self.TitleContainer.TitleText:SetText(title) end

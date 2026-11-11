@@ -2,96 +2,145 @@ local _, AF = ...
 local A = { queue = {}, rows = {} }
 AF.Achievements = A
 local ART = "Interface\\AchievementFrame\\"
-local function texture(parent, path, width, height, point, relative, x, y)
-  local t = parent:CreateTexture(nil, "ARTWORK")
-  t:SetTexture(path); t:SetSize(width, height); t:SetPoint(point, parent, relative, x, y)
+local function texture(parent, path, width, height, point, relative, x, y, layer)
+  local t = parent:CreateTexture(nil, layer or "ARTWORK")
+  if path then t:SetTexture(path) end
+  t:SetSize(width, height); t:SetPoint(point, parent, relative, x, y)
   return t
 end
 local function label(parent, width, height, point, relative, x, y, font)
   local t = parent:CreateFontString(nil, "OVERLAY", font or "GameFontHighlight")
   t:SetSize(width, height); t:SetPoint(point, parent, relative, x, y)
-  t:SetJustifyH("CENTER")
+  t:SetJustifyH("CENTER"); t:SetJustifyV("MIDDLE")
+  t:SetShadowColor(0, 0, 0, 1); t:SetShadowOffset(1, -1)
   return t
 end
 local function atlas(t, name)
-  if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then t:SetAtlas(name, true) end
+  if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
+    -- Explicitly replace UVs; a file-sheet crop is invalid on an atlas region.
+    t:SetAtlas(name, true, "LINEAR", true)
+    return true
+  end
+  return false
+end
+local function inset(parent, width, height, x, y)
+  local frame = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
+  frame:SetSize(width, height); frame:SetPoint("TOPLEFT", x, y)
+  local base = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+  frame.surface = base
+  base:SetAllPoints(frame.Bg); base:SetColorTexture(0.08, 0.065, 0.04, 1)
+  if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("Professions-background-summarylist") then
+    frame.Bg:SetAtlas("Professions-background-summarylist", false, "LINEAR", true)
+  end
+  return frame
+end
+local function icon(parent, width, height, point, relative, x, y, alert)
+  local holder = CreateFrame("Frame", nil, parent)
+  holder:SetSize(width, height); holder:SetPoint(point, parent, relative, x, y)
+  local image = texture(holder, AF.ACTIVITY_ICON, alert and 52 or 50, alert and 52 or 50,
+    "CENTER", "CENTER", 0, alert and 0 or 3)
+  local border = texture(holder, nil, 72, 72, "CENTER", "CENTER", -1, 2, "OVERLAY")
+  if not atlas(border, "ui-achievement-iconframe") then
+    border:SetTexture(ART .. "UI-Achievement-IconFrame")
+    border:SetTexCoord(0, 0.5625, 0, 0.5625)
+  end
+  return image, border, holder
+end
+local function shield(parent, alert)
+  local holder = CreateFrame("Frame", nil, parent)
+  holder:SetSize(64, 64)
+  holder:SetPoint(alert and "TOPRIGHT" or "RIGHT", parent, alert and "TOPRIGHT" or "RIGHT",
+    alert and -8 or -10, alert and -15 or 0)
+  local image = texture(holder, nil, 66, 64, "TOPRIGHT", "TOPRIGHT", 1, -6, "BACKGROUND")
+  if not atlas(image, "ui-achievement-shield-1") then
+    image:SetTexture(ART .. "UI-Achievement-Shields"); image:SetTexCoord(0, 0.5, 0, 0.5)
+  end
+  local points = label(holder, 42, 18, "CENTER", "CENTER", 3, -2, "GameFontNormal")
+  return image, points, holder
 end
 function A:Build(page)
-  self.heading = label(page, 550, 30, "TOP", "TOP", 0, -4, "GameFontNormalLarge")
-  local scroll = CreateFrame("ScrollFrame", nil, page)
-  scroll:SetPoint("TOPLEFT", 0, -42); scroll:SetSize(534, 462)
+  self.pointsFrame = inset(page, 560, 38, 0, -4)
+  self.pointsBar = CreateFrame("StatusBar", nil, self.pointsFrame)
+  self.pointsBar:SetPoint("TOPLEFT", 10, -9); self.pointsBar:SetSize(540, 20)
+  self.pointsBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+  self.pointsBar:SetStatusBarColor(0.76, 0.55, 0.16)
+  self.heading = label(self.pointsBar, 530, 20, "CENTER", "CENTER", 0, 0)
+  self.listFrame = inset(page, 560, 452, 0, -56)
+  local scroll = CreateFrame("ScrollFrame", nil, self.listFrame)
+  scroll:SetPoint("TOPLEFT", 8, -8); scroll:SetSize(524, 436)
   local content = CreateFrame("Frame", nil, scroll)
-  content:SetSize(534, math.max(1, #AF.ACHIEVEMENTS * 112))
+  content:SetSize(524, math.max(1, #AF.ACHIEVEMENTS * 112))
   scroll:SetScrollChild(content)
   -- The base scroll template has no track/thumb; use the complete native widget.
-  local scrollbar = CreateFrame("EventFrame", nil, page, "MinimalScrollBar")
-  scrollbar:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 5, 0)
-  scrollbar:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 5, 0)
+  local scrollbar = CreateFrame("EventFrame", nil, self.listFrame, "MinimalScrollBar")
+  scrollbar:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 11, 0)
+  scrollbar:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 11, 0)
   self.scroll, self.scrollbar = scroll, scrollbar
-  self.maximum = math.max(0, #AF.ACHIEVEMENTS * 112 - 462)
+  self.maximum = math.max(0, #AF.ACHIEVEMENTS * 112 - 436)
   scrollbar:RegisterCallback("OnScroll", function(_, percentage)
     scroll:SetVerticalScroll(percentage * self.maximum)
   end, self)
-  scrollbar:Init(math.min(1, 462 / content:GetHeight()), 112 / math.max(1, self.maximum))
+  scrollbar:Init(math.min(1, 436 / content:GetHeight()), 112 / math.max(1, self.maximum))
   scroll:EnableMouseWheel(true)
   scroll:SetScript("OnMouseWheel", function(_, delta)
     local value = math.max(0, math.min(self.maximum, scroll:GetVerticalScroll() - delta * 56))
     scrollbar:SetScrollPercentage(value / math.max(1, self.maximum), true)
   end)
   for i = 1, #AF.ACHIEVEMENTS do
-    local row = CreateFrame("Frame", nil, content)
-    row:SetSize(534, 104); row:SetPoint("TOPLEFT", 0, -(i - 1) * 112)
-    row.background = texture(row, ART .. "UI-Achievement-Parchment-Horizontal", 534, 104, "TOPLEFT", "TOPLEFT", 0, 0)
-    row.background:SetTexCoord(0, 1, 1 - 104 / 256, 1)
-    row.titlebar = texture(row, ART .. "UI-Achievement-Borders", 524, 24, "TOPLEFT", "TOPLEFT", 5, -4)
-    row.icon = texture(row, AF.ACTIVITY_ICON, 50, 50, "LEFT", "LEFT", 14, 0)
-    row.iconFrame = texture(row, ART .. "UI-Achievement-IconFrame", 72, 72, "CENTER", "LEFT", 40, -2)
-    row.iconFrame:SetTexCoord(0, 0.5625, 0, 0.5625)
-    row.shield = texture(row, ART .. "UI-Achievement-Shields", 66, 64, "RIGHT", "RIGHT", -3, 0)
-    row.shield:SetTexCoord(0, 0.5, 0, 0.5)
-    row.scoreText = label(row, 42, 30, "CENTER", "RIGHT", -34, 0, "GameFontNormalLarge")
-    row.title = label(row, 374, 29, "TOPLEFT", "TOPLEFT", 78, -3)
-    row.description = label(row, 374, 42, "TOPLEFT", "TOPLEFT", 78, -32)
-    row.date = label(row, 374, 22, "BOTTOMLEFT", "BOTTOMLEFT", 78, 3, "GameFontHighlightSmall")
+    local row = inset(content, 524, 104, 0, -(i - 1) * 112)
+    row.background = row.Bg
+    row.titlebar = texture(row, nil, 512, 26, "TOPLEFT", "TOPLEFT", 6, -6)
+    row.icon, row.iconFrame, row.iconHolder = icon(row, 60, 60, "LEFT", "LEFT", 10, 0)
+    row.shield, row.scoreText, row.shieldHolder = shield(row, false)
+    row.title = label(row, 356, 24, "TOPLEFT", "TOPLEFT", 82, -10)
+    row.description = label(row, 356, 34, "TOPLEFT", "TOPLEFT", 82, -36)
+    row.date = label(row, 356, 18, "BOTTOMLEFT", "BOTTOMLEFT", 82, 10, "GameFontHighlightSmall")
     self.rows[i] = row
   end
 end
 function A:Refresh()
   if not self.heading then return end
   local points, available = AF:GetAchievementPoints()
+  self.pointsBar:SetMinMaxValues(0, math.max(1, available))
+  self.pointsBar:SetValue(points)
   self.heading:SetText(string.format(AF:T("ACHIEVEMENT_POINTS"), points, available))
   for i, entry in ipairs(AF:GetAchievementList()) do
     local row, award = self.rows[i], entry.award
     row.awardID, row.earned = award.id, entry.earned
-    row.background:SetTexture(ART .. (entry.earned and "UI-Achievement-Parchment-Horizontal" or "UI-Achievement-Parchment-Horizontal-Desaturated"))
-    if entry.earned then row.titlebar:SetTexCoord(0, 0.9765625, 0.66015625, 0.73828125)
-    else row.titlebar:SetTexCoord(0, 1, 0.91796875, 0.99609375) end
+    local shade = entry.earned and 1 or 0.65
+    row.background:SetVertexColor(shade, shade, shade)
+    row.titlebar:SetColorTexture(entry.earned and 0.65 or 0.3, entry.earned and 0.42 or 0.3, entry.earned and 0.12 or 0.3, entry.earned and 0.18 or 0.08)
     row.icon:SetTexture(award.icon)
     for _, t in ipairs({ row.icon, row.iconFrame, row.shield }) do t:SetDesaturated(not entry.earned) end
     row.scoreText:SetText(award.points)
+    row.scoreText:SetTextColor(entry.earned and 1 or 0.65, entry.earned and 0.82 or 0.65, entry.earned and 0.3 or 0.65)
     row.title:SetText(AF:T("AWARD_" .. award.id))
     row.description:SetText(AF:T("AWARD_DESC_" .. award.id))
     row.date:SetText(entry.earned and string.format(AF:T("EARNED_DATE"), entry.date) or AF:T("NOT_EARNED"))
-    local shade = entry.earned and 0.15 or 0.65
-    row.title:SetTextColor(entry.earned and 1 or shade, entry.earned and 0.82 or shade, entry.earned and 0.5 or shade)
-    row.description:SetTextColor(entry.earned and 0.15 or 0.7, entry.earned and 0.1 or 0.7, entry.earned and 0.05 or 0.7)
-    row.date:SetTextColor(shade, shade, shade)
+    row.title:SetTextColor(shade, shade, shade)
+    row.description:SetTextColor(shade, shade, shade)
+    row.date:SetTextColor(entry.earned and 0.84 or 0.6, entry.earned and 0.76 or 0.6, entry.earned and 0.58 or 0.6)
   end
 end
 function A:BuildToast()
   local frame = CreateFrame("Frame", nil, UIParent)
   frame:SetSize(300, 101); frame:SetFrameStrata("DIALOG"); frame:EnableMouse(false); frame:Hide()
-  local bg = texture(frame, ART .. "UI-Achievement-Parchment-Horizontal", 300, 101, "CENTER", "CENTER", 0, 0)
-  atlas(bg, "ui-achievement-alert-background")
-  frame.icon = texture(frame, AF.ACTIVITY_ICON, 52, 52, "LEFT", "LEFT", 9, -1)
-  local border = texture(frame, ART .. "UI-Achievement-IconFrame", 78, 75, "CENTER", "LEFT", 34, -1)
-  border:SetTexCoord(0, 0.5625, 0, 0.5625); atlas(border, "ui-achievement-iconframe")
-  local shield = texture(frame, ART .. "UI-Achievement-Shields", 64, 64, "RIGHT", "RIGHT", -8, 0)
-  shield:SetTexCoord(0, 0.5, 0, 0.5); atlas(shield, "ui-achievement-shield-1")
-  frame.title = label(frame, 180, 18, "TOP", "TOP", 7, -20, "GameFontNormalSmall")
-  frame.title:SetText(AF:T("TOAST_TITLE"))
-  frame.awardName = label(frame, 155, 40, "TOP", "TOP", 7, -36)
-  frame.scoreText = label(frame, 35, 30, "CENTER", "RIGHT", -36, -2, "GameFontNormalLarge")
+  frame.background = texture(frame, nil, 300, 101, "CENTER", "CENTER", 0, 0, "BACKGROUND")
+  if not atlas(frame.background, "ui-achievement-alert-background") then
+    -- A complete native frame replaces the entire missing atlas, never a cropped sheet.
+    frame.fallback = inset(frame, 300, 76, 0, -15)
+    frame.fallback:SetFrameLevel(frame:GetFrameLevel())
+  end
+  -- Match the authored alert's subframes, anchors, draw layers and font areas.
+  frame.icon, frame.iconFrame, frame.iconHolder = icon(frame, 78, 75, "TOPLEFT", "TOPLEFT", -4, -15, true)
+  frame.shield, frame.scoreText, frame.shieldHolder = shield(frame, true)
+  frame.title = label(frame, 200, 12, "TOP", "TOP", 7, -23, "GameFontBlackTiny")
+  frame.title:SetShadowOffset(0, 0); frame.title:SetText(AF:T("TOAST_TITLE"))
+  frame.awardName = label(frame, 155, 36, "TOP", "TOP", 7, -35)
+  frame.awardName:SetTextColor(1, 1, 1); frame.awardName:SetMaxLines(2)
+  if frame.fallback then
+    frame.title:SetTextColor(1, 0.82, 0.3); frame.title:SetShadowOffset(1, -1)
+  end
   self.toast = frame
 end
 function A:ShowNext()

@@ -4,7 +4,7 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
-- Eight 10-point addon achievements, including First Steps at 50 estimated steps; native parchment cards, desaturated locked state and earned-first scrolling list
+- Eight 10-point addon achievements, including First Steps at 50 estimated steps; framed native textured cards, a total-points bar and desaturated locked state and earned-first scrolling list
 - Queued achievement-earned notifications independent of dashboard visibility, with native alert artwork
 - Temporary `/af reset` testing command with current-character-only native confirmation; preserve settings and other characters
 - Pinned shared addon-development standards, offline integrity gate and reviewed sync/update procedure
@@ -29,6 +29,9 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Reset atlas UVs explicitly to prevent cropped/magnified achievement-alert shields and icon frames
+- Match native icon/shield subframe geometry and centered two-line alert names; keep atlas artwork at authored dimensions
+- Replace dark earned descriptions with white shadowed text, add card/list borders and use a laurel-shield sidebar icon
 - Cancel dashboard refresh timers when hidden instead of waking an idle ticker
 - Prevent transparent dialog art from exposing the world through the main window and panels
 - Avoid displaying 28% for 29 out of 100 jumps through floating-point truncation

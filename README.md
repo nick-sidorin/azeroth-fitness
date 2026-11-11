@@ -51,7 +51,7 @@ Native component use and mock tests do not establish the final appearance in eve
 
 ## Achievements
 
-The award-icon tab contains only achievements: eight cards worth 10 points each, with earned cards first and locked cards desaturated. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
+The award-icon tab contains only achievements: eight framed cards worth 10 points each, a gold total-points bar, white earned text and desaturated locked icons. Earned cards appear first. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
 
 **First Steps** unlocks after 50 estimated lifetime steps. Newly earned achievements display a queued Blizzard-style notification at the lower center of the screen, even when the dashboard is closed. These are addon achievements, separate from Blizzard character achievement points. There are no partial-progress notifications. For testing, `/af reset` opens a native confirmation before deleting this character’s statistics; Cancel/Escape or unavailable confirmation leaves them intact.
 
@@ -71,7 +71,7 @@ Data is saved locally as AzerothFitnessDB via the WoW SavedVariables system, key
 
 ## Forever compatibility
 
-Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The owner approved the portrait-frame preview for merging. The new achievement cards, notifications and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
+Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The owner approved the portrait-frame preview for merging. The owner reports that achievement behavior works; the corrected artwork/layout and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
 
 ## Research and credits
 

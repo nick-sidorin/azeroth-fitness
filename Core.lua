@@ -180,7 +180,7 @@ for _, award in ipairs(AF.ACHIEVEMENTS) do
   award.points = 10
   award.icon = "Interface\\Icons\\" .. awardIcons[award.id]
 end
-AF.ACHIEVEMENT_ICON = "Interface\\Icons\\Achievement_Level_10"
+AF.ACHIEVEMENT_ICON = "Interface\\Icons\\Achievement_PVP_A_01"
 
 function AF:GetAchievementList()
   local result = {}

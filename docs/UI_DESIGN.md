@@ -31,9 +31,9 @@ This records the owner's current design choices. This repository vendors the sam
 
 ## Achievement view
 
-The award-icon sidebar tab replaces Records. Use Blizzard achievement parchment (colored/desaturated), native icon frames, title strips and point shields on addon-owned rows. A native `MinimalScrollBar` controls a clipped engine `ScrollFrame`; keep its thumb, track and arrow behavior. Earned rows sort first, then stable definition order. Each award gives 10 points. Put best day, step streak and lifetime totals in History above the chart.
+The award-icon sidebar tab replaces Records. Use framed dark native profession-list surfaces with white earned text and desaturated locked icons. Each row and the entire scroll viewport have their own native inset border. Keep native achievement icon frames and laurel point shields at authored atlas dimensions; reset UVs explicitly when switching from a file sheet to an atlas. Anchor image/border/points inside their native-sized icon and shield subframes. Display the total in a gold status bar with a centered localized points label. A native `MinimalScrollBar` controls a clipped engine `ScrollFrame`; keep its thumb, track and arrow behavior. Earned rows sort first, then stable definition order. Each award gives 10 points. Put best day, step streak and lifetime totals in History above the chart.
 
-Newly earned awards queue a noninteractive alert using native achievement atlases at 30% of UIParent height above the bottom. Animate only while a notification is active; clear pending alerts on a confirmed testing reset. Do not use Blizzard achievement IDs or insert addon entries into native alert pools. No progress notifications.
+Newly earned awards queue a noninteractive alert using native achievement atlases and the authored 300 x 101 geometry at 30% of UIParent height above the bottom. Animate only while a notification is active; clear pending alerts on a confirmed testing reset. Do not use Blizzard achievement IDs or insert addon entries into native alert pools. No progress notifications.
 
 ## Verification boundary
 

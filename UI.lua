@@ -129,6 +129,10 @@ function UI:Build()
     else tab:SetPoint("TOPLEFT", window, "TOPRIGHT", 0, -60) end
     -- The template sizes its art/mask and handles hover and press visuals.
     tab.Icon:SetTexture(icons[id])
+    if id == "achievements" and C_Texture and C_Texture.GetAtlasInfo
+        and C_Texture.GetAtlasInfo("ui-achievement-shield-1") then
+      tab.Icon:SetAtlas("ui-achievement-shield-1", false, "LINEAR", true)
+    end
     tab.tooltipText = AF:T(string.upper(id))
     tab:SetFillToInterior(true)
     tab:SetCustomOnMouseUpHandler(function(_, mouseButton, upInside)
