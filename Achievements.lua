@@ -55,11 +55,8 @@ local function shield(parent, alert)
   if not atlas(image, "ui-achievement-shield-1") then
     image:SetTexture(ART .. "UI-Achievement-Shields"); image:SetTexCoord(0, 0.5, 0, 0.5)
   end
-  local points = label(holder, 42, 18, "CENTER", "CENTER", 3, -2, "GameFontNormal")
-  if alert then
-    -- Center on the shield artwork, whose top inset differs from its container.
-    points:ClearAllPoints(); points:SetPoint("CENTER", image, "CENTER", 3, 0)
-  end
+  local points = label(holder, image:GetWidth(), image:GetHeight(), "CENTER", "CENTER", 0, 0, "GameFontNormal")
+  points:ClearAllPoints(); points:SetAllPoints(image)
   return image, points, holder
 end
 local function achievementCard(parent, width, height, y)
@@ -115,8 +112,20 @@ function A:Build(page)
     row.icon, row.iconFrame, row.iconHolder = icon(row, 60, 60, "LEFT", "LEFT", 10, 0)
     row.shield, row.scoreText, row.shieldHolder = shield(row, false)
     row.title = label(row, 356, 24, "TOPLEFT", "TOPLEFT", 82, -7, "GameFontHighlightMedium")
-    row.description = label(row, 356, 34, "TOPLEFT", "TOPLEFT", 82, -36)
-    row.date = label(row, 356, 18, "BOTTOMLEFT", "BOTTOMLEFT", 82, 10, "GameFontHighlightSmall")
+    row.description = label(row, 356, 26, "TOPLEFT", "TOPLEFT", 82, -30)
+    local surround = CreateFrame("Frame", nil, row, "BackdropTemplate")
+    surround:SetSize(356, 20); surround:SetPoint("TOPLEFT", 82, -58)
+    surround:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8",
+      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
+      insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+    surround:SetBackdropColor(0, 0, 0, 0.9)
+    surround:SetBackdropBorderColor(0.5, 0.48, 0.4, 1)
+    row.progress = CreateFrame("StatusBar", nil, surround)
+    row.progress:SetPoint("TOPLEFT", 3, -3); row.progress:SetSize(350, 14)
+    row.progress:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    row.progress:SetStatusBarColor(0.12, 0.65, 0.16)
+    row.progressText = label(row.progress, 346, 14, "CENTER", "CENTER", 0, 0, "GameFontHighlightSmall")
+    row.date = label(row, 356, 16, "BOTTOMLEFT", "BOTTOMLEFT", 82, 8, "GameFontHighlightSmall")
     row.title:SetJustifyH("LEFT"); row.description:SetJustifyH("LEFT"); row.date:SetJustifyH("LEFT")
     self.rows[i] = row
   end
@@ -127,6 +136,7 @@ function A:Refresh()
   self.pointsBar:SetMinMaxValues(0, math.max(1, available))
   self.pointsBar:SetValue(points)
   self.heading:SetText(string.format(AF:T("ACHIEVEMENT_POINTS"), points, available))
+  local focusedIndex
   for i, entry in ipairs(AF:GetAchievementList()) do
     local row, award = self.rows[i], entry.award
     row.awardID, row.earned = award.id, entry.earned
@@ -141,6 +151,12 @@ function A:Refresh()
       row.titlebar:SetTexCoord(0, 1, 0.91796875, 0.99609375)
       row:SetBackdropBorderColor(0.42, 0.39, 0.32, 1)
     end
+    if award.id == self.focusedID then
+      focusedIndex = i; row:SetBackdropBorderColor(1, 0.82, 0.2, 1)
+    end
+    local current, target = AF:GetAchievementProgress(award)
+    row.progress:SetMinMaxValues(0, target); row.progress:SetValue(current)
+    row.progressText:SetText(AF:FormatAchievementProgress(award))
     row.titlebar:SetVertexColor(1, 1, 1, 0.65)
     row.icon:SetTexture(award.icon)
     for _, t in ipairs({ row.icon, row.iconFrame, row.shield }) do t:SetDesaturated(not entry.earned) end
@@ -153,10 +169,53 @@ function A:Refresh()
     row.description:SetTextColor(shade, shade, shade)
     row.date:SetTextColor(entry.earned and 0.84 or 0.6, entry.earned and 0.76 or 0.6, entry.earned and 0.58 or 0.6)
   end
+  if focusedIndex and focusedIndex ~= self.focusedIndex then self:ScrollToAchievement(self.focusedID) end
+end
+
+function A:ScrollToAchievement(id)
+  for i, row in ipairs(self.rows) do
+    if row.awardID == id then
+      self.focusedID, self.focusedIndex = id, i
+      local offset = math.min(self.maximum, (i - 1) * 112)
+      self.scrollbar:SetScrollPercentage(offset / math.max(1, self.maximum), true)
+      return true
+    end
+  end
+  return false
+end
+
+function A:Open(id)
+  if not AF.UI or not AF.UI.window then return false end
+  local known = false
+  for _, award in ipairs(AF.ACHIEVEMENTS) do if award.id == id then known = true; break end end
+  if not known then return false end
+  self.focusedID, self.focusedIndex = id, nil
+  AF.UI:Show("achievements")
+  return self:ScrollToAchievement(id)
+end
+
+function A:DismissCurrent()
+  if self.toast then self.toast:SetScript("OnUpdate", nil); self.toast:Hide() end
+  self.current = nil; self:ShowNext()
+end
+
+local function hideToastTooltip(frame)
+  if GameTooltip and GameTooltip:GetOwner() == frame then GameTooltip:Hide() end
 end
 function A:BuildToast()
-  local frame = CreateFrame("Frame", nil, UIParent)
-  frame:SetSize(300, 101); frame:SetFrameStrata("DIALOG"); frame:EnableMouse(false); frame:Hide()
+  local frame = CreateFrame("Button", nil, UIParent)
+  frame:SetSize(300, 101); frame:SetFrameStrata("DIALOG"); frame:EnableMouse(true); frame:Hide()
+  frame:RegisterForClicks("LeftButtonUp")
+  frame:SetScript("OnClick", function(_, button)
+    if button == "LeftButton" and self.current and self:Open(self.current.id) then self:DismissCurrent() end
+  end)
+  frame:SetScript("OnEnter", function()
+    if GameTooltip then
+      GameTooltip:SetOwner(frame, "ANCHOR_TOP"); GameTooltip:SetText(AF:T("TOAST_OPEN")); GameTooltip:Show()
+    end
+  end)
+  frame:SetScript("OnLeave", hideToastTooltip)
+  frame:SetScript("OnHide", hideToastTooltip)
   frame.background = texture(frame, nil, 300, 101, "CENTER", "CENTER", 0, 0, "BACKGROUND")
   if not atlas(frame.background, "ui-achievement-alert-background") then
     -- A complete native frame replaces the entire missing atlas, never a cropped sheet.
@@ -189,7 +248,7 @@ function A:ShowNext()
     elapsed = elapsed + delta
     frame:SetAlpha(math.max(0, math.min(1, elapsed / 0.2, (6 - elapsed) / 1.5)))
     if elapsed >= 6 then
-      frame:SetScript("OnUpdate", nil); frame:Hide(); self.current = nil; self:ShowNext()
+      self:DismissCurrent()
     end
   end)
 end
@@ -200,6 +259,7 @@ function A:Earned(award)
 end
 function A:Clear()
   self.queue, self.current = {}, nil
+  self.focusedID, self.focusedIndex = nil, nil
   if self.toast then self.toast:SetScript("OnUpdate", nil); self.toast:Hide() end
   if self.scrollbar then self.scrollbar:SetScrollPercentage(0, true) end
 end

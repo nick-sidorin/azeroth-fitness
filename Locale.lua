@@ -3,6 +3,8 @@ AF.NAME = "Azeroth Fitness"
 AF.locale = type(GetLocale) == "function" and GetLocale() or "enUS"
 AF.locales = {}
 AF.locales.enUS = {
+  YARDS = "yd",
+  TOAST_OPEN = "Click to view this achievement",
   ACHIEVEMENTS = "Achievements",
   ACHIEVEMENT_POINTS = "Achievement points: %d / %d",
   EARNED_DATE = "Earned: %s",
@@ -76,6 +78,8 @@ AF.locales.enUS = {
   SETTINGS_UNAVAILABLE = "Native AddOns settings are unavailable in this client.",
 }
 AF.locales.ruRU = {
+  YARDS = "ярд.",
+  TOAST_OPEN = "Нажми, чтобы открыть это достижение",
   ACHIEVEMENTS = "Достижения",
   ACHIEVEMENT_POINTS = "Очки достижений: %d / %d",
   EARNED_DATE = "Получено: %s",

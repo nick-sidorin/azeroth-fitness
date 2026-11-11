@@ -40,6 +40,10 @@ local function object(kind, name, parent, template)
   end
   return result
 end
+function Methods:EnableMouse(value) self.mouseEnabled = value end
+function Methods:RegisterForClicks(...) self.clickButtons = { ... } end
+function Methods:SetOwner(owner) self.owner = owner end
+function Methods:GetOwner() return self.owner end
 function Methods:SetScrollChild(child) self.scrollChild = child end
 function Methods:SetVerticalScroll(value) self.verticalScroll = value end
 function Methods:GetVerticalScroll() return self.verticalScroll or 0 end
@@ -146,8 +150,8 @@ function Methods:SetFocus() self.focused = true end
 function Methods:HighlightText() self.highlighted = true end
 function Methods:StartMoving() self.moving = true end
 function Methods:StopMovingOrSizing() self.moving = false end
-for _, method in ipairs({ "SetFrameStrata", "SetClampedToScreen", "EnableMouse", "SetMovable",
-    "RegisterForDrag", "RegisterForClicks", "SetAutoFocus", "SetHighlightTexture", "SetOwner", "AddLine" }) do
+for _, method in ipairs({ "SetFrameStrata", "SetClampedToScreen", "SetMovable",
+    "RegisterForDrag", "SetAutoFocus", "SetHighlightTexture", "AddLine" }) do
   Methods[method] = function() end
 end
 CreateFrame = object

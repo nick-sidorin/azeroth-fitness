@@ -156,18 +156,19 @@ function AF:Aggregate(lastDays)
   return result
 end
 
+-- The same progress getter/target drives both unlocking and the visible meter.
 AF.ACHIEVEMENTS = {
-  { id = "firstSteps", name = "First Steps", desc = "50 estimated steps", value = function(a) return a.char.total.steps >= 50 end },
-  { id = "touchGrass", name = "Touch Grass", desc = "10,000 lifetime steps", value = function(a) return a.char.total.steps >= 10000 end },
-  { id = "stillSitting", name = "Still Sitting", desc = "50,000 steps in one day", value = function(a) local _, n = a:BestDay(); return n >= 50000 end },
-  { id = "backpedal", name = "Backpedal Champion", desc = "1,000 yards backward", value = function(a) return (a.char.total.yards.back or 0) >= 1000 end },
-  { id = "crabMode", name = "Crab Mode", desc = "10 km of strafing", value = function(a)
+  { id = "firstSteps", target = 50, progress = function(a) return a.char.total.steps end },
+  { id = "touchGrass", target = 10000, progress = function(a) return a.char.total.steps end },
+  { id = "stillSitting", target = 50000, progress = function(a) local _, n = a:BestDay(); return n end },
+  { id = "backpedal", target = 1000, unit = "YARDS", progress = function(a) return a.char.total.yards.back or 0 end },
+  { id = "crabMode", target = 10000, unit = "METERS", progress = function(a)
       local y = (a.char.total.yards.strafeLeft or 0) + (a.char.total.yards.strafeRight or 0)
-      return y * a.METERS_PER_YARD >= 10000
+      return y * a.METERS_PER_YARD
     end },
-  { id = "jumpAddict", name = "Jump Addict", desc = "1,000 jumps", value = function(a) return a.char.total.jumps >= 1000 end },
-  { id = "marathon", name = "Azeroth Marathon", desc = "42.195 km on foot", value = function(a) return a:FootYards(a.char.total) * a.METERS_PER_YARD >= 42195 end },
-  { id = "couch", name = "Professional Couch Adventurer", desc = "7-day goal streak", value = function(a) return a:Streak() >= 7 end },
+  { id = "jumpAddict", target = 1000, progress = function(a) return a.char.total.jumps end },
+  { id = "marathon", target = 42195, unit = "METERS", progress = function(a) return a:FootYards(a.char.total) * a.METERS_PER_YARD end },
+  { id = "couch", target = 7, progress = function(a) return a:Streak() end },
 }
 
 local awardIcons = {
@@ -181,6 +182,19 @@ for _, award in ipairs(AF.ACHIEVEMENTS) do
   award.icon = "Interface\\Icons\\" .. awardIcons[award.id]
 end
 AF.ACHIEVEMENT_ICON = "Interface\\Icons\\Achievement_PVP_A_01"
+
+function AF:GetAchievementProgress(award)
+  local current = self.char and award.progress(self) or 0
+  -- Earned awards remain complete even when a current streak later expires.
+  if self.char and self.char.achievements[award.id] then current = award.target end
+  return math.max(0, math.min(award.target, current)), award.target, award.unit
+end
+
+function AF:FormatAchievementProgress(award)
+  local current, target, unit = self:GetAchievementProgress(award)
+  local counter = self:FormatNumber(math.floor(current)) .. " / " .. self:FormatNumber(target)
+  return unit and counter .. " " .. self:T(unit) or counter
+end
 
 function AF:GetAchievementList()
   local result = {}
@@ -208,7 +222,7 @@ function AF:CheckAchievements()
   if not self.char then return end
   self.char.achievements = self.char.achievements or {}
   for _, award in ipairs(self.ACHIEVEMENTS) do
-    if not self.char.achievements[award.id] and award.value(self) then
+    if not self.char.achievements[award.id] and award.progress(self) >= award.target then
       self.char.achievements[award.id] = self:DayKey()
       self:Say(string.format(self:T("AWARD_UNLOCKED"), self:T("AWARD_" .. award.id)))
       if self.Achievements then self.Achievements:Earned(award) end

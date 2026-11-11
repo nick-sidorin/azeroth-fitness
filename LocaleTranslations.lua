@@ -2,6 +2,8 @@
 local _, AF = ...
 
 AF.locales.deDE = {
+  YARDS = "yd",
+  TOAST_OPEN = "Klicken, um diesen Erfolg anzuzeigen",
   ACHIEVEMENTS = "Erfolge",
   ACHIEVEMENT_POINTS = "Erfolgspunkte: %d / %d",
   EARNED_DATE = "Erhalten: %s",
@@ -76,6 +78,8 @@ AF.locales.deDE = {
 }
 
 AF.locales.frFR = {
+  YARDS = "yd",
+  TOAST_OPEN = "Cliquez pour afficher ce haut fait",
   ACHIEVEMENTS = "Hauts faits",
   ACHIEVEMENT_POINTS = "Points de hauts faits : %d / %d",
   EARNED_DATE = "Obtenu : %s",
@@ -150,6 +154,8 @@ AF.locales.frFR = {
 }
 
 AF.locales.esES = {
+  YARDS = "yd",
+  TOAST_OPEN = "Haz clic para ver este logro",
   ACHIEVEMENTS = "Logros",
   ACHIEVEMENT_POINTS = "Puntos de logro: %d / %d",
   EARNED_DATE = "Conseguido: %s",
@@ -224,6 +230,8 @@ AF.locales.esES = {
 }
 
 AF.locales.itIT = {
+  YARDS = "iarde",
+  TOAST_OPEN = "Clicca per visualizzare questa impresa",
   ACHIEVEMENTS = "Imprese",
   ACHIEVEMENT_POINTS = "Punti impresa: %d / %d",
   EARNED_DATE = "Ottenuta: %s",
@@ -298,6 +306,8 @@ AF.locales.itIT = {
 }
 
 AF.locales.ptBR = {
+  YARDS = "jardas",
+  TOAST_OPEN = "Clique para ver esta conquista",
   ACHIEVEMENTS = "Conquistas",
   ACHIEVEMENT_POINTS = "Pontos de conquista: %d / %d",
   EARNED_DATE = "Obtida: %s",
@@ -372,6 +382,8 @@ AF.locales.ptBR = {
 }
 
 AF.locales.koKR = {
+  YARDS = "야드",
+  TOAST_OPEN = "클릭하여 이 업적 보기",
   ACHIEVEMENTS = "업적",
   ACHIEVEMENT_POINTS = "업적 점수: %d / %d",
   EARNED_DATE = "달성: %s",
@@ -446,6 +458,8 @@ AF.locales.koKR = {
 }
 
 AF.locales.zhCN = {
+  YARDS = "码",
+  TOAST_OPEN = "点击查看此成就",
   ACHIEVEMENTS = "成就",
   ACHIEVEMENT_POINTS = "成就点数：%d / %d",
   EARNED_DATE = "获得日期：%s",
@@ -520,6 +534,8 @@ AF.locales.zhCN = {
 }
 
 AF.locales.zhTW = {
+  YARDS = "碼",
+  TOAST_OPEN = "點擊查看此成就",
   ACHIEVEMENTS = "成就",
   ACHIEVEMENT_POINTS = "成就點數：%d / %d",
   EARNED_DATE = "獲得日期：%s",

@@ -4,6 +4,8 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts
+- Green achievement-card progress bars with localized current/target counters, driven by the same metrics/thresholds as unlocking
 - Eight 10-point addon achievements, including First Steps at 50 estimated steps; framed native textured cards, a total-points bar and desaturated locked state and earned-first scrolling list
 - Queued achievement-earned notifications independent of dashboard visibility, with native alert artwork
 - Temporary `/af reset` testing command with current-character-only native confirmation; preserve settings and other characters
@@ -29,6 +31,7 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Center points across the full shield texture in both alerts and cards, removing fixed per-digit offsets
 - Restore visible colored/desaturated achievement parchment with translucent shading, thin native borders and aligned card text
 - Preserve the approved earned toast and center only its digits on the inset shield artwork; add the total-points bar’s textured track
 - Pin build/publisher runners to Ubuntu 24.04 and build the SHA-256-verified official Lua 5.1.5 source instead of depending on failing Ubuntu package mirrors

@@ -43,7 +43,12 @@ for _, available in ipairs({ true, false }) do
   assert(toast.iconHolder.points[1][4] == -4 and toast.iconHolder.points[1][5] == -15)
   assert(toast.shieldHolder.points[1][4] == -8 and toast.shieldHolder.points[1][5] == -15)
   assert(toast.scoreText:GetParent() == toast.shieldHolder)
-  assert(toast.scoreText.points[1][2] == toast.shield and toast.scoreText.points[1][4] == 3 and toast.scoreText.points[1][5] == 0)
+  assert(toast.scoreText.allPoints == toast.shield and row.scoreText.allPoints == row.shield)
+  assert(toast.scoreText.justifyH == "CENTER" and toast.scoreText.justifyV == "MIDDLE")
+  for _, value in ipairs({ "1", "10", "20", "100" }) do
+    toast.scoreText:SetText(value)
+    assert(toast.scoreText.allPoints == toast.shield and toast.scoreText.width == toast.shield.width)
+  end
   assert(toast.awardName.height == 36 and toast.awardName.justifyV == "MIDDLE" and toast.awardName.maxLines == 2)
   assert(toast.iconFrame.template == "OVERLAY", "The native icon border must render above the icon")
   if available then
