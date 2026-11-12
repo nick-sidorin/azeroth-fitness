@@ -4,6 +4,7 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Adopt shared standards 0.1.1 requiring native component and documented API discovery before custom Blizzard-style UI
 - Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts
 - Green achievement-card progress bars with localized current/target counters, driven by the same metrics/thresholds as unlocking
 - Eight 10-point addon achievements, including First Steps at 50 estimated steps; framed native textured cards, a total-points bar and desaturated locked state and earned-first scrolling list

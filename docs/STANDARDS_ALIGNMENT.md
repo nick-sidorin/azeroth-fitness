@@ -2,6 +2,12 @@
 
 Reviewed **2026-11-10** against `wow-addon-standards` **0.1.0**, commit `f36540efe61eb90671be1359849cbc6d2ddd85c1`. The source instructions and field notes were read in full. The dependency uses the same vendored-copy/lock/sync pattern as No Quest Hints Forever. It is not loaded by WoW or fetched during CI.
 
+## Reviewed update — 2026-11-12
+
+Adopted standards 0.1.1 at `9bf620f0ac502454e1a08a31f9b20d29cdab87ec`, proposed in [shared standards PR #1](https://github.com/nick-sidorin/wow-addon-standards/pull/1). The reviewed diff requires native component/documented API discovery before custom Blizzard-style UI, permits safe native-art fallbacks with an explicit reason and records the matching-source/client-verification boundary. The sync tool is unchanged. Updated the vendored documents and lock through the existing tool in the current UI PR; no addon runtime or version changed.
+
+The audit below preserves the initial 2026-11-10 implementation/enforcement snapshot. See `PROJECT_CONTEXT.md` for subsequent runtime merges and current feature-preview status.
+
 ## Alignment and ownership
 
 | Area | Current implementation / action | Verification boundary |

@@ -1,6 +1,6 @@
 # Shared AGENTS.md — WoW addon development
 
-Standards version: **0.1.0**, 2026-11-10. Portable contributor instructions; project-specific behavior belongs in the consuming repository's root `AGENTS.md` and `PROJECT_CONTEXT.md`.
+Standards version: **0.1.1**, 2026-11-12. Portable contributor instructions; project-specific behavior belongs in the consuming repository's root `AGENTS.md` and `PROJECT_CONTEXT.md`.
 
 ## Working agreement
 
@@ -32,6 +32,10 @@ Standards version: **0.1.0**, 2026-11-10. Portable contributor instructions; pro
 
 ## Blizzard-native visual design
 
+- When the owner asks for Blizzard's visual style or native behavior, first search the matching client's API documentation and UI source for an existing component and supported API. Make this investigation the starting point before implementing a custom visual approximation.
+- Prefer reusing a complete permitted widget/template and its public documented API. Inspect its children, mixins, initialization, inherited scripts, input handling and loading context so reuse preserves the component's authored appearance and lifecycle. Use an existing suitable API instead of duplicating its behavior through guessed internals.
+- Check protected/forbidden status, real-ID requirements, shared caches/pools and load-on-demand dependencies before instantiation. If the complete component cannot safely serve addon-owned data, use ordinary addon-owned frames with its native artwork, authored geometry and draw layers. Build custom visuals only where suitable reusable pieces are unavailable or the product needs an extension; record why that fallback is necessary.
+- Record the chosen component/API, source branch/file or documentation reference, and any fallback reason in the project's UI research notes. Distinguish source/API evidence from actual target-client verification.
 - Build settings in the client's native AddOns settings category when supported. A dedicated feature window can coexist with native settings; do not duplicate settings state across two interfaces.
 - Prefer native widgets, font objects, atlases, masks, borders and button textures available in the target client. Inspect authored atlas dimensions and maintain aspect ratios. Use the correct large-button art or three-slice/nine-slice construction instead of stretching a small button.
 - Game art availability does not make every XML template safe to inherit. Glue/login UI templates may not exist in the loaded game UI. Keep a visually consistent, capability-checked fallback without duplicate borders.
