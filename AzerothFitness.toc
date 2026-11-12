@@ -24,5 +24,6 @@ Achievements.lua
 Motion.lua
 Jump.lua
 Minimap.lua
+Rings.lua
 UI.lua
 Bootstrap.lua

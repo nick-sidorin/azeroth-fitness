@@ -4,7 +4,7 @@ for _, available in ipairs({ true, false }) do
   local atlasUV = { 0.25, 0.4, 0.6, 0.8 }
   if available then
     Mock.atlases["ui-achievement-iconframe"] = { width = 72, height = 72, texCoord = atlasUV }
-    Mock.atlases["ui-achievement-shield-1"] = { width = 66, height = 64, texCoord = atlasUV }
+    Mock.atlases["ui-achievement-shield-1"] = { width = 96, height = 96, texCoord = atlasUV }
     Mock.atlases["ui-achievement-alert-background"] = { width = 330, height = 96, texCoord = atlasUV }
   else
     Mock.atlases["Professions-background-summarylist"] = nil
@@ -16,7 +16,7 @@ for _, available in ipairs({ true, false }) do
   UnitRace = function() return "Human", "Human" end
   AzerothFitnessDB = nil
   local AF = {}
-  for _, file in ipairs({ "Locale.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "UI.lua" }) do
+  for _, file in ipairs({ "Locale.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "Rings.lua", "UI.lua" }) do
     assert(loadfile(file))("AzerothFitness", AF)
   end
   AF:Init(); AF:Login(); AF.UI:Init()
@@ -88,7 +88,9 @@ for _, available in ipairs({ true, false }) do
   assert(A.pointsBar.value == 10 and A.pointsBar.maximum == 80)
   assert(not row.progress:IsShown() and row.date:IsShown(), "Earned cards hide the entire meter and show their date")
   assert(row.date:GetText() == AF:FormatAchievementDate(AF:DayKey()))
-  assert(row.date.points[1][2] == row.shield and row.date.points[1][3] == "BOTTOM")
+  assert(row.date:GetParent() == row.shieldHolder and row.date.shadowColor[4] == 1)
+  assert(row.date.points[1][4] == -8 and row.date.points[1][5] == 8 and row.date.tint[1] > 0.9)
+  assert(row.date.points[1][2] == row and row.date.points[1][3] == "BOTTOMRIGHT")
   assert(row.shieldHolder.points[1][1] == "TOPRIGHT" and row.shieldHolder.points[1][5] == -2)
   assert(row.description.tint[1] < 0.25 and row.title.tint[1] == 1 and row.description.shadowColor[4] == 0,
     "Earned goals must be dark on bright parchment; titles stay light on their strip")

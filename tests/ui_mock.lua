@@ -126,6 +126,10 @@ function Methods:SetBackdrop(value) self.backdrop = value end
 function Methods:SetBackdropColor(...) self.backdropColor = { ... } end
 function Methods:SetBackdropBorderColor(...) self.borderColor = { ... } end
 function Methods:SetStatusBarTexture(value) self.texture = value end
+function Methods:GetValue() return self.value end
+function Methods:SetRotation(value) self.rotation = value end
+function Methods:SetRadialProgressBarPercent(value) self.radialPercent = value; self.radialWrites = (self.radialWrites or 0) + 1 end
+function Methods:SetRadialProgressBarReverse(value) self.radialReverse = value end
 function Methods:GetStatusBarTexture()
   if not self.statusBarTexture then
     self.statusBarTexture = object("Texture", nil, self)
@@ -162,6 +166,7 @@ for _, method in ipairs({ "SetFrameStrata", "SetClampedToScreen", "SetMovable",
     "RegisterForDrag", "SetAutoFocus", "SetHighlightTexture", "AddLine" }) do
   Methods[method] = function() end
 end
+Mock.methods = Methods
 CreateFrame = object
 Mock.atlases = {
   ["common-sidetab"] = { width = 64, height = 71 },

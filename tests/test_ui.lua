@@ -5,7 +5,7 @@ UnitGUID = function() return "Player-UI" end
 UnitName = function() return "Test" end
 UnitRace = function() return "Human", "Human" end
 local AF = {}
-for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "UI.lua" }) do
+for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "Rings.lua", "UI.lua" }) do
   assert(loadfile(file))("AzerothFitness", AF)
 end
 AF:Init()
@@ -56,14 +56,14 @@ ui.headerDrag.scripts.OnDragStop()
 assert(not ui.window.moving)
 assert(ui.goals.steps.value:GetText() == "100" and ui.goals.steps.target:GetText() == "/ 10 000")
 assert(ui.goals.jumps.value:GetText() == "1" and ui.goals.jumps.target:GetText() == "/ 100")
-assert(math.abs(ui.goals.steps.bar.status.value - 0.01) < 0.000001)
+assert(math.abs(ui.goals.steps.bar:GetProgress() - 0.01) < 0.000001)
 AF:Today().jumps = 29
 ui:Refresh()
 assert(ui.goals.jumps.percent:GetText() == "29%", "Do not floor 29 jumps to 28% through floating-point division")
 ui.goals.steps.bar:SetProgress(3)
-assert(ui.goals.steps.bar.status.value == 1)
+assert(ui.goals.steps.bar:GetProgress() == 1)
 ui.goals.steps.bar:SetProgress(-1)
-assert(ui.goals.steps.bar.status.value == 0)
+assert(ui.goals.steps.bar:GetProgress() == 0)
 
 ui:Show("settings")
 ui.goalInput:SetText("250")

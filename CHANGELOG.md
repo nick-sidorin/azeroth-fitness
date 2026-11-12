@@ -4,6 +4,7 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Three nested, round-capped daily activity rings using the native radial texture API, with numeric goals and a horizontal-meter capability fallback
 - Adopt shared standards 0.1.1 requiring native component and documented API discovery before custom Blizzard-style UI
 - Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts
 - Green achievement-card progress bars with localized current/target counters, driven by the same metrics/thresholds as unlocking
@@ -34,6 +35,7 @@ Versions follow Semantic Versioning.
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Keep earned dates inside card bounds on the shield foreground layer with contrasting text, independent of atlas padding
 - Retry Lua source-download transport errors and fall back to a digest-identical BLFS mirror when lua.org is unavailable
 - Center points across the full shield texture in both alerts and cards, removing fixed per-digit offsets
 - Restore visible colored/desaturated achievement parchment with translucent shading, thin native borders and aligned card text

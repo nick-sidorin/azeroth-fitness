@@ -141,9 +141,10 @@ function A:Build(page)
     row.description = label(row, 356, 26, "TOP", "TOP", 0, -30)
     row.progress = achievementProgress(row)
     row.progressText = label(row.progress, 206, 14, "CENTER", "CENTER", 0, 0, "GameFontHighlightSmall")
-    row.date = label(row, 76, 14, "TOP", "TOP", 0, 0, "GameFontHighlightSmall")
-    row.date:ClearAllPoints(); row.date:SetPoint("TOP", row.shield, "BOTTOM", 0, -6)
-    row.date:SetShadowColor(0, 0, 0, 0)
+    row.date = label(row.shieldHolder, 76, 16, "BOTTOMRIGHT", "BOTTOMRIGHT", 0, 0, "GameFontHighlightSmall")
+    -- Atlas rectangles may include transparent padding beyond the visible shield.
+    -- Keep the date inside the card and above the shield child's artwork layer.
+    row.date:ClearAllPoints(); row.date:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 8)
     self.rows[i] = row
   end
 end
@@ -196,7 +197,7 @@ function A:Refresh()
       row.description:SetShadowColor(0, 0, 0, 1)
       row.description:SetShadowOffset(1, -1)
     end
-    row.date:SetTextColor(0.5, 0.32, 0.06)
+    row.date:SetTextColor(0.96, 0.82, 0.52)
   end
   if focusedIndex and focusedIndex ~= self.focusedIndex then self:ScrollToAchievement(self.focusedID) end
 end

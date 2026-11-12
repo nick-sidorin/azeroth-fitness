@@ -7,6 +7,7 @@ for _, available in ipairs({ true, false }) do
   end
   local AF = { ACTIVITY_ICON = "Interface\\Icons\\Ability_Rogue_Sprint", ACHIEVEMENTS = {}, T = function(_, key) return key end }
   assert(loadfile("Achievements.lua"))("AzerothFitness", AF)
+  assert(loadfile("Rings.lua"))("AzerothFitness", AF)
   assert(loadfile("UI.lua"))("AzerothFitness", AF)
   AF.UI:Build()
   local window = AF.UI.window

@@ -5,7 +5,7 @@ UnitGUID = function() return "Navigation-Test" end
 UnitName = function() return "Tester" end
 UnitRace = function() return "Human", "Human" end
 local AF = {}
-for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "UI.lua" }) do
+for _, file in ipairs({ "Locale.lua", "LocaleTranslations.lua", "Core.lua", "Achievements.lua", "Minimap.lua", "Rings.lua", "UI.lua" }) do
   assert(loadfile(file))("AzerothFitness", AF)
 end
 AF.Say = function() end

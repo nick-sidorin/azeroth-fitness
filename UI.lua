@@ -68,6 +68,7 @@ local function bar(parent, x, y, width, height, tint)
   status:SetMinMaxValues(0, 1)
   status:SetValue(0)
   function surround:SetProgress(value) status:SetValue(math.max(0, math.min(1, value or 0))) end
+  function surround:GetProgress() return status:GetValue() end
   surround.status = status
   return surround
 end
@@ -159,16 +160,21 @@ function UI:BuildToday()
   self.todayLabel = line(page, 12, -4, 380, AF:T("DAILY_ACTIVITY"), 17, C.gold)
   self.todayDate = line(page, 380, -7, 168, "", 12, C.muted)
   self.goals = {}
-  for i, entry in ipairs({ { "steps", "STEPS" }, { "jumps", "JUMPS" }, { "murlos", "MURLO" } }) do
-    local id, key = entry[1], entry[2]
-    local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
-    local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
-    local value = line(frame, 15, -33, 210, "", 26, C.white)
-    local target = line(frame, 227, -43, 190, "", 14, C.muted)
-    local percent = line(frame, 428, -37, 116, "", 16, C[id])
-    percent:SetJustifyH("RIGHT")
-    local progress = bar(frame, 14, -64, 532, 18, C[id])
-    self.goals[id] = { label = label, value = value, target = target, percent = percent, bar = progress, key = key }
+  self.usesRings = AF.Rings and AF.Rings:IsSupported(page) or false
+  if self.usesRings then
+    self:BuildActivityRings(page)
+  else
+    for i, entry in ipairs({ { "steps", "STEPS" }, { "jumps", "JUMPS" }, { "murlos", "MURLO" } }) do
+      local id, key = entry[1], entry[2]
+      local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
+      local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
+      local value = line(frame, 15, -33, 210, "", 26, C.white)
+      local target = line(frame, 227, -43, 190, "", 14, C.muted)
+      local percent = line(frame, 428, -37, 116, "", 16, C[id])
+      percent:SetJustifyH("RIGHT")
+      local progress = bar(frame, 14, -64, 532, 18, C[id])
+      self.goals[id] = { label = label, value = value, target = target, percent = percent, bar = progress, key = key }
+    end
   end
   local details = panel(page, 0, -352, 560, 100)
   self.distanceTitle = line(details, 14, -12, 235, AF:T("DISTANCE"), 12, C.gold)
@@ -178,6 +184,27 @@ function UI:BuildToday()
   self.accuracy = line(page, 9, -464, 542, "", 11, C.muted)
   self.disclaimer = line(page, 9, -486, 542, AF:T("ESTIMATE"), 11, C.muted)
   self.disclaimer:SetHeight(28)
+end
+
+function UI:BuildActivityRings(page)
+  local display = panel(page, 0, -38, 560, 306)
+  -- A uniform dark canvas makes the nested masked circles join without seams.
+  local background = { 0.025, 0.022, 0.018 }
+  display.Bg:Hide(); display.surface:SetColorTexture(background[1], background[2], background[3], 1)
+  self.ringPanel = display
+  for i, entry in ipairs({ { "murlos", "MURLO" }, { "steps", "STEPS" }, { "jumps", "JUMPS" } }) do
+    local id, key = entry[1], entry[2]
+    local ring = AF.Rings:Create(display, 260 - (i - 1) * 58, 24, C[id], background)
+    ring:SetPoint("CENTER", display, "TOPLEFT", 152, -153)
+    ring:SetFrameLevel(display:GetFrameLevel() + i)
+    local y = -25 - (i - 1) * 88
+    local name = line(display, 310, y, 232, AF:T(key), 14, C[id])
+    local value = line(display, 310, y - 23, 232, "", 25, C.white)
+    local target = line(display, 310, y - 53, 160, "", 12, C.muted)
+    local percent = line(display, 476, y - 53, 66, "", 12, C[id])
+    percent:SetJustifyH("RIGHT")
+    self.goals[id] = { label = name, value = value, target = target, percent = percent, bar = ring, key = key }
+  end
 end
 
 function UI:BuildHistory()
