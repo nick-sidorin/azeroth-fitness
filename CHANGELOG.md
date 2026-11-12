@@ -26,6 +26,8 @@ Versions follow Semantic Versioning.
 - CurseForge source-packager configuration and reusable listing description
 
 ### Changed
+- Center card titles/goals and use Blizzard’s short three-slice progress border with shadow, translucent track and inset green fill
+- Hide meters on earned cards; show dark goal text on bright parchment and a locale-ordered slash date below the raised shield
 - Rename Records to Achievements with an award icon; move best day, step-goal streak and lifetime totals to History
 - Keep the Azeroth Fitness brand untranslated in every locale and remove language-selection buttons
 - Localize number separators/distance units and accept decimal commas in stride input

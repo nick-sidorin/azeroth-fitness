@@ -71,15 +71,27 @@ for _, available in ipairs({ true, false }) do
   assert(row.background.texCoord[3] == 1 - 96 / 256 and row.background.width == 516)
   assert(row.surface.solid[4] == 1 and row.shade.solid[4] <= 0.55,
     "Keep the card opaque without hiding its texture under a solid overlay")
-  assert(row.title.justifyH == "LEFT" and row.description.justifyH == "LEFT" and row.date.justifyH == "LEFT")
+  assert(row.title.justifyH == "CENTER" and row.description.justifyH == "CENTER" and row.date.justifyH == "CENTER")
   assert(row.backdrop.edgeFile == "Interface\\Tooltips\\UI-Tooltip-Border")
   assert(A.pointsTrack.texture == "Interface\\TargetingFrame\\UI-StatusBar")
+  assert(row.progress:IsShown() and not row.date:IsShown(), "Unfinished cards show progress, not an earned date")
+  assert(row.progress.width == 212 and row.progress.height == 14)
+  assert(row.progress.points[1][2] == row and row.progress.points[1][4] == 0)
+  assert(row.progress:GetStatusBarTexture().drawLayer == "BORDER", "Fill must sit below the native border art")
+  assert(row.progress.track.solid[4] == 0.4 and row.progress.tint[2] == 0.6)
+  for _, slice in ipairs(row.progress.borderSlices) do
+    assert(slice.texture == "Interface\\AchievementFrame\\UI-Achievement-ProgressBar-Border")
+  end
   AF.char.achievements.firstSteps = AF:DayKey(); A:Refresh()
   assert(row.background.texture == "Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal")
-  assert(row.shade.solid[4] == 0.4 and row.borderColor[1] > A.rows[2].borderColor[1])
+  assert(row.shade.solid[4] == 0.08 and row.borderColor[1] > A.rows[2].borderColor[1])
   assert(A.pointsBar.value == 10 and A.pointsBar.maximum == 80)
-  assert(row.description.tint[1] == 1 and row.title.tint[1] == 1 and row.description.shadowColor[4] == 1,
-    "Earned copy must be white with a readable shadow")
+  assert(not row.progress:IsShown() and row.date:IsShown(), "Earned cards hide the entire meter and show their date")
+  assert(row.date:GetText() == AF:FormatAchievementDate(AF:DayKey()))
+  assert(row.date.points[1][2] == row.shield and row.date.points[1][3] == "BOTTOM")
+  assert(row.shieldHolder.points[1][1] == "TOPRIGHT" and row.shieldHolder.points[1][5] == -2)
+  assert(row.description.tint[1] < 0.25 and row.title.tint[1] == 1 and row.description.shadowColor[4] == 0,
+    "Earned goals must be dark on bright parchment; titles stay light on their strip")
   assert(A.rows[2].description.tint[1] < 1 and A.rows[2].icon.desaturated)
 end
-print("PASS: native atlas UV reset/fallback, authored icon/shield geometry, white earned text and framed point/list/card surfaces")
+print("PASS: native atlas UV reset/fallback, authored icon/shield geometry, centered native meters, earned dates/dark goals and framed surfaces")

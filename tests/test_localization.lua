@@ -23,6 +23,10 @@ for _, locale in ipairs(locales) do
     assert(placeholders(dictionary[key]) == placeholders(english), locale .. ": incompatible format " .. key)
     assert(AF:T(key) == dictionary[key], locale .. ": unexpected fallback " .. key)
   end
+  local expectedDate = (locale == "enUS" and "3/9/26")
+    or ((locale == "koKR" or locale == "zhCN" or locale == "zhTW") and "26/3/9") or "9/3/26"
+  assert(AF:FormatAchievementDate("2026-03-09") == expectedDate, locale .. ": slash date order")
+  assert(AF:FormatAchievementDate(nil) == "" and AF:FormatAchievementDate("invalid") == "")
   assert(AF:T("NOT_A_TRANSLATION") == "NOT_A_TRANSLATION")
   assert(AF:T("HELP"):find("/af", 1, true))
   assert(string.format(AF:T("COVERAGE"), 75):find("75", 1, true))
@@ -36,6 +40,7 @@ for _, locale in ipairs(locales) do
 end
 local unknown = loadLocale("unknown")
 assert(unknown:T("TODAY") == "Today")
+assert(unknown:FormatAchievementDate("2026-03-09") == "3/9/26")
 GetLocale = nil
 local missing = {}
 assert(loadfile("Locale.lua"))("AzerothFitness", missing)

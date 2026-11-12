@@ -76,6 +76,30 @@ local function achievementCard(parent, width, height, y)
     "TOPLEFT", "TOPLEFT", 6, -5)
   return row
 end
+local function achievementProgress(row)
+  -- Match AchievementProgressBarTemplate without loading real-achievement providers.
+  local progress = CreateFrame("StatusBar", nil, row)
+  progress:SetSize(212, 14); progress:SetPoint("TOP", row, "TOP", 0, -62)
+  progress:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+  progress:SetStatusBarColor(0, 0.6, 0, 1)
+  progress:GetStatusBarTexture():SetDrawLayer("BORDER")
+  progress.track = texture(progress, nil, 212, 14, "CENTER", "CENTER", 0, 0, "BACKGROUND")
+  progress.track:SetColorTexture(0, 0, 0, 0.4)
+  local path = ART .. "UI-Achievement-ProgressBar-Border"
+  local left = texture(progress, path, 16, 24, "TOPLEFT", "TOPLEFT", -6, 5)
+  left:SetPoint("BOTTOMLEFT", progress, "BOTTOMLEFT", -6, -5)
+  left:SetTexCoord(0, 0.0625, 0, 0.75)
+  local right = texture(progress, path, 16, 24, "TOPRIGHT", "TOPRIGHT", 6, 5)
+  right:SetPoint("BOTTOMRIGHT", progress, "BOTTOMRIGHT", 6, -5)
+  right:SetTexCoord(0.812, 0.8745, 0, 0.75)
+  local middle = progress:CreateTexture(nil, "ARTWORK")
+  middle:SetTexture(path)
+  middle:SetPoint("TOPLEFT", left, "TOPRIGHT")
+  middle:SetPoint("BOTTOMRIGHT", right, "BOTTOMLEFT")
+  middle:SetTexCoord(0.0625, 0.812, 0, 0.75)
+  progress.borderSlices = { left, middle, right }
+  return progress
+end
 function A:Build(page)
   self.pointsFrame = inset(page, 560, 38, 0, -4)
   self.pointsBar = CreateFrame("StatusBar", nil, self.pointsFrame)
@@ -111,22 +135,15 @@ function A:Build(page)
     local row = achievementCard(content, 524, 104, -(i - 1) * 112)
     row.icon, row.iconFrame, row.iconHolder = icon(row, 60, 60, "LEFT", "LEFT", 10, 0)
     row.shield, row.scoreText, row.shieldHolder = shield(row, false)
-    row.title = label(row, 356, 24, "TOPLEFT", "TOPLEFT", 82, -7, "GameFontHighlightMedium")
-    row.description = label(row, 356, 26, "TOPLEFT", "TOPLEFT", 82, -30)
-    local surround = CreateFrame("Frame", nil, row, "BackdropTemplate")
-    surround:SetSize(356, 20); surround:SetPoint("TOPLEFT", 82, -58)
-    surround:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8",
-      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
-      insets = { left = 3, right = 3, top = 3, bottom = 3 } })
-    surround:SetBackdropColor(0, 0, 0, 0.9)
-    surround:SetBackdropBorderColor(0.5, 0.48, 0.4, 1)
-    row.progress = CreateFrame("StatusBar", nil, surround)
-    row.progress:SetPoint("TOPLEFT", 3, -3); row.progress:SetSize(350, 14)
-    row.progress:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    row.progress:SetStatusBarColor(0.12, 0.65, 0.16)
-    row.progressText = label(row.progress, 346, 14, "CENTER", "CENTER", 0, 0, "GameFontHighlightSmall")
-    row.date = label(row, 356, 16, "BOTTOMLEFT", "BOTTOMLEFT", 82, 8, "GameFontHighlightSmall")
-    row.title:SetJustifyH("LEFT"); row.description:SetJustifyH("LEFT"); row.date:SetJustifyH("LEFT")
+    row.shieldHolder:ClearAllPoints()
+    row.shieldHolder:SetPoint("TOPRIGHT", row, "TOPRIGHT", -10, -2)
+    row.title = label(row, 356, 24, "TOP", "TOP", 0, -7, "GameFontHighlightMedium")
+    row.description = label(row, 356, 26, "TOP", "TOP", 0, -30)
+    row.progress = achievementProgress(row)
+    row.progressText = label(row.progress, 206, 14, "CENTER", "CENTER", 0, 0, "GameFontHighlightSmall")
+    row.date = label(row, 76, 14, "TOP", "TOP", 0, 0, "GameFontHighlightSmall")
+    row.date:ClearAllPoints(); row.date:SetPoint("TOP", row.shield, "BOTTOM", 0, -6)
+    row.date:SetShadowColor(0, 0, 0, 0)
     self.rows[i] = row
   end
 end
@@ -143,7 +160,7 @@ function A:Refresh()
     local shade = entry.earned and 1 or 0.65
     row.background:SetTexture(ART .. (entry.earned and "UI-Achievement-Parchment-Horizontal"
       or "UI-Achievement-Parchment-Horizontal-Desaturated"))
-    row.shade:SetColorTexture(0, 0, 0, entry.earned and 0.40 or 0.52)
+    row.shade:SetColorTexture(0, 0, 0, entry.earned and 0.08 or 0.52)
     if entry.earned then
       row.titlebar:SetTexCoord(0, 0.9765625, 0.66015625, 0.73828125)
       row:SetBackdropBorderColor(0.72, 0.55, 0.28, 1)
@@ -157,6 +174,7 @@ function A:Refresh()
     local current, target = AF:GetAchievementProgress(award)
     row.progress:SetMinMaxValues(0, target); row.progress:SetValue(current)
     row.progressText:SetText(AF:FormatAchievementProgress(award))
+    row.progress:SetShown(not entry.earned)
     row.titlebar:SetVertexColor(1, 1, 1, 0.65)
     row.icon:SetTexture(award.icon)
     for _, t in ipairs({ row.icon, row.iconFrame, row.shield }) do t:SetDesaturated(not entry.earned) end
@@ -164,10 +182,21 @@ function A:Refresh()
     row.scoreText:SetTextColor(entry.earned and 1 or 0.65, entry.earned and 0.82 or 0.65, entry.earned and 0.3 or 0.65)
     row.title:SetText(AF:T("AWARD_" .. award.id))
     row.description:SetText(AF:T("AWARD_DESC_" .. award.id))
-    row.date:SetText(entry.earned and string.format(AF:T("EARNED_DATE"), entry.date) or AF:T("NOT_EARNED"))
+    row.date:SetText(entry.earned and AF:FormatAchievementDate(entry.date) or "")
+    row.date:SetShown(entry.earned)
+    row.description:ClearAllPoints()
+    row.description:SetPoint("TOP", row, "TOP", 0, entry.earned and -36 or -30)
     row.title:SetTextColor(shade, shade, shade)
-    row.description:SetTextColor(shade, shade, shade)
-    row.date:SetTextColor(entry.earned and 0.84 or 0.6, entry.earned and 0.76 or 0.6, entry.earned and 0.58 or 0.6)
+    if entry.earned then
+      row.description:SetTextColor(0.18, 0.10, 0.035)
+      row.description:SetShadowColor(0, 0, 0, 0)
+      row.description:SetShadowOffset(0, 0)
+    else
+      row.description:SetTextColor(0.78, 0.78, 0.78)
+      row.description:SetShadowColor(0, 0, 0, 1)
+      row.description:SetShadowOffset(1, -1)
+    end
+    row.date:SetTextColor(0.5, 0.32, 0.06)
   end
   if focusedIndex and focusedIndex ~= self.focusedIndex then self:ScrollToAchievement(self.focusedID) end
 end

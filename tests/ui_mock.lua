@@ -126,6 +126,14 @@ function Methods:SetBackdrop(value) self.backdrop = value end
 function Methods:SetBackdropColor(...) self.backdropColor = { ... } end
 function Methods:SetBackdropBorderColor(...) self.borderColor = { ... } end
 function Methods:SetStatusBarTexture(value) self.texture = value end
+function Methods:GetStatusBarTexture()
+  if not self.statusBarTexture then
+    self.statusBarTexture = object("Texture", nil, self)
+    self.statusBarTexture:SetTexture(self.texture)
+  end
+  return self.statusBarTexture
+end
+function Methods:SetDrawLayer(layer) self.drawLayer = layer end
 function Methods:SetStatusBarColor(...) self.tint = { ... } end
 function Methods:SetMinMaxValues(minimum, maximum) self.minimum, self.maximum = minimum, maximum end
 function Methods:SetValue(value) self.value = value end

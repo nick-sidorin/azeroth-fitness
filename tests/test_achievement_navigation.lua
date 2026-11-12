@@ -35,7 +35,7 @@ AF.char.achievements.couch = AF:DayKey()
 assert(AF:Streak() == 0 and AF:GetAchievementProgress(awards.couch) == 7,
   "An earned streak award must remain complete after its active streak expires")
 A:Refresh()
-assert(A.rows[1].awardID == "couch" and A.rows[1].progress.value == 7)
+assert(A.rows[1].awardID == "couch" and A.rows[1].progress.value == 7 and not A.rows[1].progress:IsShown())
 local found
 for _, row in ipairs(A.rows) do
   if row.awardID == "jumpAddict" then found = row; break end
@@ -77,7 +77,11 @@ toast.scripts.OnLeave(toast)
 assert(GameTooltip:IsShown(), "Toast cleanup must not hide another frame's tooltip")
 AF:ResetStatistics()
 assert(not A.focusedID and not A.focusedIndex and A.scroll:GetVerticalScroll() == 0)
-for _, row in ipairs(A.rows) do assert(row.progress.value == 0) end
+for _, row in ipairs(A.rows) do
+  assert(row.progress.value == 0 and row.progress:IsShown() and not row.date:IsShown())
+  assert(row.description.shadowColor[4] == 1 and row.description.tint[1] > 0.7,
+    "Reused rows must restore unfinished-card text styling")
+end
 -- A notification remains available if the window is temporarily unavailable.
 A:Earned(awards.firstSteps)
 local window = ui.window; ui.window = nil

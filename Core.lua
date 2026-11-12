@@ -196,6 +196,20 @@ function AF:FormatAchievementProgress(award)
   return unit and counter .. " " .. self:T(unit) or counter
 end
 
+function AF:FormatAchievementDate(dayKey)
+  if type(dayKey) ~= "string" then return "" end
+  local year, month, day = dayKey:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
+  if not year then return "" end
+  year, month, day = tonumber(year) % 100, tonumber(month), tonumber(day)
+  if self.locale == "koKR" or self.locale == "zhCN" or self.locale == "zhTW" then
+    return string.format("%02d/%d/%d", year, month, day)
+  end
+  if self.locale == "enUS" or not self.locales[self.locale] then
+    return string.format("%d/%d/%02d", month, day, year)
+  end
+  return string.format("%d/%d/%02d", day, month, year)
+end
+
 function AF:GetAchievementList()
   local result = {}
   for index, award in ipairs(self.ACHIEVEMENTS) do
