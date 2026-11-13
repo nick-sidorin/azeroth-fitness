@@ -74,6 +74,11 @@ local function rebase()
   previousX, previousY, previousMap = position()
 end
 
+function Motion.Reset()
+  pending, previousSpeed = 0, 0
+  rebase()
+end
+
 -- UnitPosition axes and GetPlayerFacing use the same north/west convention.
 local function classify(dx, dy, distance, angle)
   if not angle or distance <= EPSILON then return "unknown" end

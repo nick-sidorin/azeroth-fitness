@@ -20,7 +20,8 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
       filename: ${{ steps.version.outputs.filename }}
@@ -28,9 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Lua 5.1
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lua5.1
+        run: bash scripts/install_lua51.sh "$RUNNER_TEMP/azeroth-fitness-lua"
 
       - name: Regression, Lua syntax and manifest gates
         run: bash scripts/run_ci.sh
@@ -93,7 +92,8 @@ jobs:
   github-release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:

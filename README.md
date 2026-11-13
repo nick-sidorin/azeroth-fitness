@@ -13,10 +13,10 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 - 7-day and 30-day history charts
 - Walking, running, backpedaling, left/right strafing and swimming distances
 - Jumps and fictional Murlocalories
-- Seven humorous achievements
+- Eight humorous achievements with points, scrollable native-style cards and earned-first sorting
 - All 12 official WoW client locales, selected automatically from the game language
-- Native portrait-frame dashboard with right-side icon tabs, horizontal activity bars and client fonts
-- Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
+- Native portrait-frame dashboard with right-side icon tabs, three concentric activity rings and client fonts
+- Live three-ring minimap shortcut with drag positioning, saved angle and visibility setting
 
 ## Installation
 
@@ -33,20 +33,27 @@ Test artifact downloads contain `AzerothFitness/` directly, without a nested ZIP
 - /af history — daily chart
 - /af settings — daily goals, stride and minimap visibility
 - /af debug — last motion mode / measurement source
+- /af reset — temporary testing command; confirm erasing the current character’s activity history, totals and achievements (keeps settings and other characters)
 
 ## Dashboard and daily goals
 
-The dashboard inherits the same `PortraitFrameTemplate` used by Forever's professions window: native portrait, title strip, nine-slice border and close button. Its right-side icon tabs use `LargeSideTabButtonTemplate`, as in the character/professions windows. Inner frames use the professions recipe-list texture at its original tint, with native rock/marble fallback. The Fitness-inspired activity bars remain addon-owned content. No Overlord or Apple art is included; circular activity rings remain future work. See [UI design decisions](docs/UI_DESIGN.md) and the [native-source/API research](docs/NATIVE_UI_RESEARCH.md).
+The dashboard inherits the same `PortraitFrameTemplate` used by Forever's professions window: native portrait, title strip, nine-slice border and close button. Its right-side icon tabs use `LargeSideTabButtonTemplate`, as in the character/professions windows. Inner frames use the professions recipe-list texture at its original tint, with native rock/marble fallback. The Today view pairs three concentric Fitness-inspired rings with numeric values/targets: rose Murlocalories outside, lime steps in the middle, cyan jumps inside. They use the client’s documented radial texture API and native circular masks with round caps, without a permanent animation timer. Ring fill stops at 100%; counters and percentages retain activity beyond the goal. If that API is unavailable, the original horizontal meters remain. No Overlord or Apple art is included. See [UI design decisions](docs/UI_DESIGN.md) and the [native-source/API research](docs/NATIVE_UI_RESEARCH.md).
 
 Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
 
-Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
+The minimap shortcut shows only a miniature set of the same three rings, updated after activity, goal changes and reset even with the dashboard closed. A one-shot local-midnight timer handles day rollover without continuous polling; hiding the shortcut cancels it. Clients without radial support retain the Sprint shortcut. Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
 
 Settings register under **Options → AddOns → Azeroth Fitness** when the native canvas API is available. `/af settings`, the settings side tab and minimap right-click open that same form, using current saved goals/stride/minimap preferences. Clients without that API retain the embedded form; there is no second settings store. **Report a problem** opens a copyable Issues URL with localized instructions. It does not open a browser or submit a report. Dashboard refresh timers exist only while the activity window is visible.
 
 **Azeroth Fitness** is the brand in every language and is never translated. The interface follows `GetLocale()` without a language selector or SavedVariables override. Supported client locales: `enUS`, `enGB`, `ruRU`, `deDE`, `frFR`, `esES`, `esMX`, `itIT`, `ptBR`, `koKR`, `zhCN`, `zhTW`. English and Spanish variants share translations; English is the fallback for unknown locales or missing keys. Numbers and distance units follow the client locale. The localization structure follows No Quest Hints Forever.
 
 Native component use and mock tests do not establish the final appearance in every Forever build. Please check translated text, joke wording, frame sizing, minimap positioning and different UI scales in game. Dictionary completeness is tested; native-speaker and client layout reviews remain useful.
+
+## Achievements
+
+The award-icon tab contains only achievements: eight parchment-textured cards worth 10 points each, thin native borders, a gold total-points bar, dark earned goals and desaturated locked icons. Earned cards appear first. Best day, goal streak and lifetime totals now live in **History**. Existing earned dates remain saved; points are calculated from known awards without rewriting history.
+
+**First Steps** unlocks after 50 estimated lifetime steps. Unfinished cards have centered goals and a short inset green progress bar with a current/target counter. Distance counters use meters or yards. Earned cards hide the bar, show dark goal text on bright parchment and place a short slash-formatted date under the raised points shield; saved completion remains intact when a streak expires. Newly earned achievements display a queued Blizzard-style notification at the lower center of the screen, even when the dashboard is closed. Left-click the notification to open the Achievements tab, scroll to that award and highlight its card; other queued notifications remain available. These are addon achievements, separate from Blizzard character achievement points. Progress appears on the cards; notifications announce newly earned awards only. For testing, `/af reset` opens a native confirmation before deleting this character’s statistics; Cancel/Escape or unavailable confirmation leaves them intact.
 
 ## Measurement integrity
 
@@ -64,7 +71,7 @@ Data is saved locally as AzerothFitnessDB via the WoW SavedVariables system, key
 
 ## Forever compatibility
 
-Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The current portrait-frame redesign and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
+Based on the publicly available Trailblazer addon manifest, the TOC targets Interface 16001 and AllowLoadGameType camelot. The owner has opened earlier UI previews in Forever and supplied screenshots. The owner approved the portrait-frame preview for merging. The owner reports that achievement behavior works; the corrected artwork/layout and measurement edge cases still require validation: function availability, jump hooks, movement direction signs and combat secret-value handling are not established by those screenshots.
 
 ## Research and credits
 
@@ -84,14 +91,17 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 - [x] Native localized UI and daily charts
 - [ ] Forever client smoke tests and compatibility fixes
 - [ ] Calibration and automated tests
-- [ ] More polished charts/activity rings
+- [x] Native radial-API activity-ring preview
+- [ ] More polished charts
 - [ ] Public release after verification
 
 ## Development, builds and releases
 
-Development follows the [pinned shared addon standards](docs/standards/README.md), version 0.1.0 at `f36540efe61eb90671be1359849cbc6d2ddd85c1`, following the No Quest Hints Forever adoption pattern. The [lock](docs/standards/standards.lock.json) records document hashes. `python3 scripts/standards.py check` verifies local integrity offline and runs in CI; updates require a reviewed commit and adoption PR. The addon does not load or package this dependency. See the [alignment audit](docs/STANDARDS_ALIGNMENT.md) for main versus pending UI work and the [release handoff contract](docs/RELEASE_HANDOFF.md).
+Development follows the [pinned shared addon standards](docs/standards/README.md), version 0.1.1 at `8e71f4977463b11881def59962f13f7277ae4f98`, following the No Quest Hints Forever adoption pattern. The [lock](docs/standards/standards.lock.json) records document hashes. `python3 scripts/standards.py check` verifies local integrity offline and runs in CI; updates require a reviewed commit and adoption PR. The addon does not load or package this dependency. See the [alignment audit](docs/STANDARDS_ALIGNMENT.md) for main versus pending UI work and the [release handoff contract](docs/RELEASE_HANDOFF.md).
 
 This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
+
+Build and publisher jobs use a pinned Ubuntu 24.04 runner image. `scripts/install_lua51.sh` compiles Lua 5.1.5 from the official HTTPS archive (with a BLFS mirror fallback) after verifying the same pinned SHA-256, using the runner’s C compiler and make; no APT mirror is required. The script takes an absolute install directory, and local contributors may instead use their existing Lua 5.1 installation.
 
 Run the shared gate locally with Python 3.9+ and Lua 5.1:
 

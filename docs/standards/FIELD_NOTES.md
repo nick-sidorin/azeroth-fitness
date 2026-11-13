@@ -61,3 +61,13 @@ A GitHub Actions artifact already wraps files in a ZIP; uploading an installable
 CurseForge's source packager has separate `.pkgmeta` behavior. Its output can lag GitHub publication. Full listing copy also needs manual editing unless an explicitly configured integration handles it; release automation alone does not update the description.
 
 **Reuse:** validate each packaging route, verify publication separately and hand over copy-ready short/full Markdown with an editor link. Keep concise benefit bullets at the top and separate Issues from Source Code. Never promise that a GitHub release means CurseForge is already public.
+
+## 9. Search for the native component before recreating its appearance
+
+**Target/evidence:** WoW: Forever, matching `forever` UI source inspected 2026-11-12; exact owner client build is not recorded. Character/professions-style addon windows could reuse the ordinary `PortraitFrameTemplate` and right-side tab controls rather than assembling an approximate shell. Native templates still need their scripts, geometry and loading context inspected; section 1's forbidden-dialog finding remains applicable.
+
+For achievement-style progress, the source already defines `AchievementProgressBarTemplate`: a short status bar, a translucent track, three border/shadow slices and a fill drawn below the border. A generic status bar with an unrelated border did not reproduce that depth. Inspecting the complete native component supplied the intended construction. Real-achievement templates can depend on actual Blizzard IDs or shared providers, so safe reuse may instead mean applying the authored artwork to an ordinary addon-owned StatusBar. Source geometry and mock checks alone do not establish the final rendering or taint behavior.
+
+**Reuse:** start with documented APIs and existing components, then verify whether they can safely own the addon's data and lifecycle. Prefer direct permitted reuse. If that is unsuitable, document the reason and reuse the smallest safe native pieces before inventing a custom design. Record the source and validation boundary in the consuming project.
+
+Source references: [Forever shared UI templates](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml), [Forever achievement components](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_AchievementUI/Mainline/Blizzard_AchievementUI.xml), and [generated widget API documentation](https://github.com/Gethe/wow-ui-source/tree/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated). These are research references, not a guarantee of permission to instantiate every exported template.

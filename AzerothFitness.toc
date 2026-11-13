@@ -20,8 +20,10 @@
 Locale.lua
 LocaleTranslations.lua
 Core.lua
+Achievements.lua
 Motion.lua
 Jump.lua
 Minimap.lua
+Rings.lua
 UI.lua
 Bootstrap.lua

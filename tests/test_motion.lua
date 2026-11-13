@@ -59,3 +59,17 @@ moving = false
 events.scripts.OnEvent(events, "PLAYER_STOPPED_MOVING")
 assert(not driver:IsShown())
 print("PASS: idle sleep, position sampling, discontinuity filter, speed fallback, unknown direction and mount/carrier separation")
+
+-- Reset rebases coordinates and discards the partially sampled interval.
+moving, mounted, speed, x = true, false, 7, 3000
+events.scripts.OnEvent(events, "PLAYER_STARTED_MOVING")
+driver.scripts.OnUpdate(driver, 0.1)
+x = 3001
+AF.Motion.Reset()
+local before = #records
+x = 3001.7
+driver.scripts.OnUpdate(driver, 0.1)
+assert(#records == before, "Reset must discard pre-reset sampling time")
+driver.scripts.OnUpdate(driver, 0.1)
+assert(#records == before + 1 and math.abs(records[#records][2] - 0.7) < 0.000001,
+  "Reset must discard pre-reset coordinate displacement")

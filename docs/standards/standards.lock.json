@@ -1,9 +1,9 @@
 {
   "repository": "https://github.com/nick-sidorin/wow-addon-standards",
-  "commit": "f36540efe61eb90671be1359849cbc6d2ddd85c1",
-  "version": "0.1.0",
+  "commit": "8e71f4977463b11881def59962f13f7277ae4f98",
+  "version": "0.1.1",
   "files": {
-    "AGENTS.md": "5f5be5497db6b34636d53e5e82843f8dad6d78e00ecd802bf6cd22de436fadfb",
-    "FIELD_NOTES.md": "dbe4b36e86419114a3c186786273dedaca5d415118bbedb72c08ec96fc581d79"
+    "AGENTS.md": "72986e5ec51ec611ec36f09a35740a896e2701e6108d6e155f38632f8892aabf",
+    "FIELD_NOTES.md": "b2bcf97582ee76ea259711494bc4ff0c658aeb1b2408d6089eea7293d88c029c"
   }
 }

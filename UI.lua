@@ -5,7 +5,9 @@ AF.UI = UI
 local W, H = 600, 590
 local C = {
   gold = { 0.93, 0.78, 0.47 }, white = { 0.96, 0.92, 0.83 }, muted = { 0.67, 0.63, 0.53 },
-  steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 },
+  steps = AF.Rings and AF.Rings.COLORS.steps or { 0.65, 0.90, 0.20 },
+  jumps = AF.Rings and AF.Rings.COLORS.jumps or { 0.15, 0.78, 0.94 },
+  murlos = AF.Rings and AF.Rings.COLORS.murlos or { 0.95, 0.26, 0.36 },
 }
 local function color(fs, c) fs:SetTextColor(c[1], c[2], c[3]) end
 local function text(parent, value, size, tint, justify)
@@ -68,6 +70,7 @@ local function bar(parent, x, y, width, height, tint)
   status:SetMinMaxValues(0, 1)
   status:SetValue(0)
   function surround:SetProgress(value) status:SetValue(math.max(0, math.min(1, value or 0))) end
+  function surround:GetProgress() return status:GetValue() end
   surround.status = status
   return surround
 end
@@ -120,15 +123,19 @@ function UI:Build()
   self.tabs, self.pages = {}, {}
   self.sideWidth = 0
   local icons = { today = AF.ACTIVITY_ICON, history = "Interface\\Icons\\INV_Misc_Book_09",
-    records = "Interface\\Icons\\INV_Misc_Coin_01", settings = "Interface\\Icons\\Trade_Engineering" }
+    achievements = AF.ACHIEVEMENT_ICON, settings = "Interface\\Icons\\Trade_Engineering" }
   local previousTab
-  for _, id in ipairs({ "today", "history", "records", "settings" }) do
+  for _, id in ipairs({ "today", "history", "achievements", "settings" }) do
     local tab = CreateFrame("Frame", nil, window, "LargeSideTabButtonTemplate")
     tab:EnableMouse(true)
     if previousTab then tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -2)
     else tab:SetPoint("TOPLEFT", window, "TOPRIGHT", 0, -60) end
     -- The template sizes its art/mask and handles hover and press visuals.
     tab.Icon:SetTexture(icons[id])
+    if id == "achievements" and C_Texture and C_Texture.GetAtlasInfo
+        and C_Texture.GetAtlasInfo("ui-achievement-shield-1") then
+      tab.Icon:SetAtlas("ui-achievement-shield-1", false, "LINEAR", true)
+    end
     tab.tooltipText = AF:T(string.upper(id))
     tab:SetFillToInterior(true)
     tab:SetCustomOnMouseUpHandler(function(_, mouseButton, upInside)
@@ -144,7 +151,7 @@ function UI:Build()
   end
   self:BuildToday()
   self:BuildHistory()
-  self:BuildRecords()
+  AF.Achievements:Build(self.pages.achievements)
   self:BuildSettings()
   window:HookScript("OnShow", function() UI:Fit(); UI:StartRefresh() end)
   window:HookScript("OnHide", function() UI:StopRefresh() end)
@@ -155,16 +162,21 @@ function UI:BuildToday()
   self.todayLabel = line(page, 12, -4, 380, AF:T("DAILY_ACTIVITY"), 17, C.gold)
   self.todayDate = line(page, 380, -7, 168, "", 12, C.muted)
   self.goals = {}
-  for i, entry in ipairs({ { "steps", "STEPS" }, { "jumps", "JUMPS" }, { "murlos", "MURLO" } }) do
-    local id, key = entry[1], entry[2]
-    local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
-    local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
-    local value = line(frame, 15, -33, 210, "", 26, C.white)
-    local target = line(frame, 227, -43, 190, "", 14, C.muted)
-    local percent = line(frame, 428, -37, 116, "", 16, C[id])
-    percent:SetJustifyH("RIGHT")
-    local progress = bar(frame, 14, -64, 532, 18, C[id])
-    self.goals[id] = { label = label, value = value, target = target, percent = percent, bar = progress, key = key }
+  self.usesRings = AF.Rings and AF.Rings:IsSupported(page) or false
+  if self.usesRings then
+    self:BuildActivityRings(page)
+  else
+    for i, entry in ipairs({ { "steps", "STEPS" }, { "jumps", "JUMPS" }, { "murlos", "MURLO" } }) do
+      local id, key = entry[1], entry[2]
+      local frame = panel(page, 0, -38 - (i - 1) * 102, 560, 94)
+      local label = line(frame, 15, -11, 220, AF:T(key), 14, C[id])
+      local value = line(frame, 15, -33, 210, "", 26, C.white)
+      local target = line(frame, 227, -43, 190, "", 14, C.muted)
+      local percent = line(frame, 428, -37, 116, "", 16, C[id])
+      percent:SetJustifyH("RIGHT")
+      local progress = bar(frame, 14, -64, 532, 18, C[id])
+      self.goals[id] = { label = label, value = value, target = target, percent = percent, bar = progress, key = key }
+    end
   end
   local details = panel(page, 0, -352, 560, 100)
   self.distanceTitle = line(details, 14, -12, 235, AF:T("DISTANCE"), 12, C.gold)
@@ -176,16 +188,42 @@ function UI:BuildToday()
   self.disclaimer:SetHeight(28)
 end
 
+function UI:BuildActivityRings(page)
+  local display = panel(page, 0, -38, 560, 306)
+  -- A uniform dark canvas makes the nested masked circles join without seams.
+  local background = AF.Rings.BACKGROUND
+  display.Bg:Hide(); display.surface:SetColorTexture(background[1], background[2], background[3], 1)
+  self.ringPanel = display
+  local anchor = CreateFrame("Frame", nil, display)
+  anchor:SetSize(260, 260); anchor:SetPoint("CENTER", display, "TOPLEFT", 152, -153)
+  local rings = AF.Rings:CreateActivitySet(anchor, 260)
+  for i, entry in ipairs(AF.Rings.ACTIVITIES) do
+    local id, key = entry[1], entry[2]
+    local ring = rings[id]
+    local y = -25 - (i - 1) * 88
+    local name = line(display, 310, y, 232, AF:T(key), 14, C[id])
+    local value = line(display, 310, y - 23, 232, "", 25, C.white)
+    local target = line(display, 310, y - 53, 160, "", 12, C.muted)
+    local percent = line(display, 476, y - 53, 66, "", 12, C[id])
+    percent:SetJustifyH("RIGHT")
+    self.goals[id] = { label = name, value = value, target = target, percent = percent, bar = ring, key = key }
+  end
+end
+
 function UI:BuildHistory()
   local page = self.pages.history
-  self.week = button(page, AF:T("WEEK"), 0, -4, 126, 26, function() UI.range = 7; UI:Refresh() end)
-  self.month = button(page, AF:T("MONTH"), 134, -4, 126, 26, function() UI.range = 30; UI:Refresh() end)
-  self.historySummary = line(page, 10, -50, 540, "", 17, C.gold)
-  local chart = panel(page, 0, -90, 560, 300)
+  local summary = panel(page, 0, -4, 560, 116)
+  self.best = line(summary, 15, -16, 530, "", 16, C.gold)
+  self.streak = line(summary, 15, -51, 530, "", 16, C.steps)
+  self.lifetime = line(summary, 15, -86, 530, "", 12, C.muted)
+  self.week = button(page, AF:T("WEEK"), 0, -132, 126, 26, function() UI.range = 7; UI:Refresh() end)
+  self.month = button(page, AF:T("MONTH"), 134, -132, 126, 26, function() UI.range = 30; UI:Refresh() end)
+  self.historySummary = line(page, 10, -170, 540, "", 17, C.gold)
+  local chart = panel(page, 0, -206, 560, 230)
   self.historyBars = {}
   for i = 1, 30 do
     local b = CreateFrame("Frame", nil, chart)
-    b:SetSize(12, 235)
+    b:SetSize(12, 170)
     local fill = b:CreateTexture(nil, "ARTWORK")
     fill:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
     fill:SetVertexColor(unpack(C.steps))
@@ -195,24 +233,8 @@ function UI:BuildHistory()
     b.fill, b.label = fill, label
     self.historyBars[i] = b
   end
-  self.historyFootnote = line(page, 10, -409, 540, AF:T("LOCAL_DATE"), 12, C.muted)
-  self.historyDates = line(page, 10, -446, 540, "", 13)
-end
-
-function UI:BuildRecords()
-  local page = self.pages.records
-  local summary = panel(page, 0, -4, 560, 116)
-  self.best = line(summary, 15, -16, 530, "", 16, C.gold)
-  self.streak = line(summary, 15, -51, 530, "", 16, C.steps)
-  self.lifetime = line(summary, 15, -86, 530, "", 12, C.muted)
-  local awards = panel(page, 0, -132, 560, 360)
-  self.achievementTitle = line(awards, 15, -13, 530, AF:T("ACHIEVEMENTS"), 16, C.gold)
-  self.awards = {}
-  for i = 1, #AF.ACHIEVEMENTS do
-    local label = line(awards, 15, -43 - (i - 1) * 44, 530, "", 12, C.muted)
-    label:SetHeight(38)
-    self.awards[i] = label
-  end
+  self.historyFootnote = line(page, 10, -449, 540, AF:T("LOCAL_DATE"), 12, C.muted)
+  self.historyDates = line(page, 10, -479, 540, "", 13)
 end
 
 local function edit(parent, x, y, initial)
@@ -340,12 +362,18 @@ function UI:Refresh()
   self.accuracy:SetText(string.format(AF:T("COVERAGE"),
     coverage > 0 and (today.coverage.position or 0) / coverage * 100 or 0))
 
-  -- Only update the chart/records while their page is selected.
+  -- Only update history/achievements while their page is selected.
   if self.page == "history" then self:RefreshHistory(today.goal) end
-  if self.page == "records" then self:RefreshRecords() end
+  if self.page == "achievements" then AF.Achievements:Refresh() end
 end
 
 function UI:RefreshHistory(goal)
+  local bestKey, steps = AF:BestDay()
+  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(steps) .. (bestKey and " (" .. bestKey .. ")" or ""))
+  self.streak:SetText(AF:T("STREAK") .. ": " .. AF:Streak() .. " " .. AF:T("DAYS"))
+  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps) .. " " .. AF:T("STEPS")
+    .. " | " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
+
   local range = self.range or 7
   local total = AF:Aggregate(range)
   self.historySummary:SetText(AF:FormatNumber(total.steps) .. " " .. AF:T("STEPS")
@@ -365,27 +393,13 @@ function UI:RefreshHistory(goal)
       b:ClearAllPoints()
       b:SetPoint("BOTTOMLEFT", b:GetParent(), "BOTTOMLEFT", 15 + (i - 1) * (width + gap), 35)
       b.fill:SetWidth(width)
-      b.fill:SetHeight(math.max(0.1, 235 * steps / maximum))
+      b.fill:SetHeight(math.max(0.1, 170 * steps / maximum))
       b.label:SetText(range == 7 and AF:DayKey(offset):sub(6) or
         ((i == 1 or i == range or i % 5 == 0) and AF:DayKey(offset):sub(9) or ""))
       b:Show()
     else b:Hide() end
   end
   self.historyDates:SetText(AF:DayKey(range - 1) .. " - " .. AF:DayKey())
-end
-
-function UI:RefreshRecords()
-  local bestKey, steps = AF:BestDay()
-  self.best:SetText(AF:T("BEST") .. ": " .. AF:FormatNumber(steps) .. (bestKey and " (" .. bestKey .. ")" or ""))
-  self.streak:SetText(AF:T("STREAK") .. ": " .. AF:Streak() .. " " .. AF:T("DAYS"))
-  self.lifetime:SetText(AF:T("LIFETIME") .. ": " .. AF:FormatNumber(AF.char.total.steps) .. " " .. AF:T("STEPS")
-    .. " | " .. AF:FormatDistance(AF:FootYards(AF.char.total)))
-  for i, award in ipairs(AF.ACHIEVEMENTS) do
-    local won = AF.char.achievements[award.id]
-    local name, description = AF:T("AWARD_" .. award.id), AF:T("AWARD_DESC_" .. award.id)
-    self.awards[i]:SetText(name .. "\n" .. description)
-    color(self.awards[i], won and C.gold or C.muted)
-  end
 end
 
 function UI:Show(page)

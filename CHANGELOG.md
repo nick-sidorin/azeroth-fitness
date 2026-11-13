@@ -4,6 +4,15 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Live miniature activity rings on the minimap without a decorative icon/frame, sharing the dashboard renderer, palette and daily targets
+- Activity/goal/reset-driven minimap refresh and a cancellable local-midnight timer independent of dashboard visibility
+- Three nested, round-capped daily activity rings using the native radial texture API, with numeric goals and a horizontal-meter capability fallback
+- Adopt shared standards 0.1.1 requiring native component and documented API discovery before custom Blizzard-style UI
+- Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts
+- Green achievement-card progress bars with localized current/target counters, driven by the same metrics/thresholds as unlocking
+- Eight 10-point addon achievements, including First Steps at 50 estimated steps; framed native textured cards, a total-points bar and desaturated locked state and earned-first scrolling list
+- Queued achievement-earned notifications independent of dashboard visibility, with native alert artwork
+- Temporary `/af reset` testing command with current-character-only native confirmation; preserve settings and other characters
 - Pinned shared addon-development standards, offline integrity gate and reviewed sync/update procedure
 - Native AddOns settings category sharing one live form with the fallback, plus a localized copyable Issues link
 - Complete dictionaries for all 12 official WoW client locales with automatic game-language selection and English fallback
@@ -21,10 +30,22 @@ Versions follow Semantic Versioning.
 - CurseForge source-packager configuration and reusable listing description
 
 ### Changed
+- Center card titles/goals and use Blizzard’s short three-slice progress border with shadow, translucent track and inset green fill
+- Hide meters on earned cards; show dark goal text on bright parchment and a locale-ordered slash date below the raised shield
+- Rename Records to Achievements with an award icon; move best day, step-goal streak and lifetime totals to History
 - Keep the Azeroth Fitness brand untranslated in every locale and remove language-selection buttons
 - Localize number separators/distance units and accept decimal commas in stride input
 
 ### Fixed
+- Keep earned dates inside card bounds on the shield foreground layer with contrasting text, independent of atlas padding
+- Retry Lua source-download transport errors and fall back to a digest-identical BLFS mirror when lua.org is unavailable
+- Center points across the full shield texture in both alerts and cards, removing fixed per-digit offsets
+- Restore visible colored/desaturated achievement parchment with translucent shading, thin native borders and aligned card text
+- Preserve the approved earned toast and center only its digits on the inset shield artwork; add the total-points bar’s textured track
+- Pin build/publisher runners to Ubuntu 24.04 and build the SHA-256-verified official Lua 5.1.5 source instead of depending on failing Ubuntu package mirrors
+- Reset atlas UVs explicitly to prevent cropped/magnified achievement-alert shields and icon frames
+- Match native icon/shield subframe geometry and centered two-line alert names; keep atlas artwork at authored dimensions
+- Replace dark earned descriptions with white shadowed text, add card/list borders and use a laurel-shield sidebar icon
 - Cancel dashboard refresh timers when hidden instead of waking an idle ticker
 - Prevent transparent dialog art from exposing the world through the main window and panels
 - Avoid displaying 28% for 29 out of 100 jumps through floating-point truncation
