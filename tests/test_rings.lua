@@ -56,6 +56,7 @@ for _, supported in ipairs({ true, false }) do
     ui.window:Hide(); today.steps = 5000; ui:Refresh()
     assert(ui.goals.steps.bar.fill.radialWrites == previous, "Hidden dashboards must not redraw rings")
   else
+    assert(not addon.MinimapButton.rings and addon.MinimapButton.icon)
     assert(ui.goals.steps.bar.status and not ui.ringPanel, "Unsupported radial APIs keep the working native bars")
   end
   ui.window:Hide()

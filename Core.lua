@@ -47,6 +47,11 @@ function AF:Today()
   return day, key
 end
 
+-- Keep the always-visible shortcut independent from the dashboard's refresh timer.
+function AF:NotifyActivityChanged(day)
+  if self.MinimapButton and self.MinimapButton.Refresh then self.MinimapButton:Refresh(day) end
+end
+
 function AF:SetDailyGoals(steps, jumps, murlos)
   local function valid(value, minimum, maximum)
     return type(value) == "number" and value == value and value >= minimum and value <= maximum
@@ -59,6 +64,7 @@ function AF:SetDailyGoals(steps, jumps, murlos)
   local day = self:Today()
   day.goal = self.char.goal
   day.activityGoals = { jumps = self.char.activityGoals.jumps, murlos = self.char.activityGoals.murlos }
+  self:NotifyActivityChanged(day)
   return true
 end
 
@@ -99,6 +105,7 @@ function AF:RecordTravel(mode, yards, seconds, source, strideGait)
     self:Say(self:T("GOAL_DONE"))
   end
   self:CheckAchievements()
+  self:NotifyActivityChanged(day)
 end
 
 function AF:RecordJump()
@@ -109,6 +116,7 @@ function AF:RecordJump()
   self.char.total.jumps = self.char.total.jumps + 1
   self.char.total.murlos = self.char.total.murlos + self.MURLO_JUMP
   self:CheckAchievements()
+  self:NotifyActivityChanged(day)
 end
 
 function AF:FootYards(ledger)
@@ -248,11 +256,12 @@ end
 function AF:ResetStatistics()
   if not self.char then return end
   self.char.days, self.char.total, self.char.achievements = {}, self:NewLedger(), {}
-  self:Today()
+  local day = self:Today()
   if self.Motion and self.Motion.Reset then self.Motion.Reset() end
   if self.Jump and self.Jump.Reset then self.Jump.Reset() end
   if self.Achievements then self.Achievements:Clear() end
   if self.UI then self.UI:Refresh() end
+  self:NotifyActivityChanged(day)
 end
 
 function AF:Say(message)
@@ -325,4 +334,5 @@ function AF:Login()
       today.activityGoals[key] = default
     end
   end
+  self:NotifyActivityChanged(today)
 end

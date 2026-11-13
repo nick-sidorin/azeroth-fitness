@@ -5,7 +5,9 @@ AF.UI = UI
 local W, H = 600, 590
 local C = {
   gold = { 0.93, 0.78, 0.47 }, white = { 0.96, 0.92, 0.83 }, muted = { 0.67, 0.63, 0.53 },
-  steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 },
+  steps = AF.Rings and AF.Rings.COLORS.steps or { 0.65, 0.90, 0.20 },
+  jumps = AF.Rings and AF.Rings.COLORS.jumps or { 0.15, 0.78, 0.94 },
+  murlos = AF.Rings and AF.Rings.COLORS.murlos or { 0.95, 0.26, 0.36 },
 }
 local function color(fs, c) fs:SetTextColor(c[1], c[2], c[3]) end
 local function text(parent, value, size, tint, justify)
@@ -189,14 +191,15 @@ end
 function UI:BuildActivityRings(page)
   local display = panel(page, 0, -38, 560, 306)
   -- A uniform dark canvas makes the nested masked circles join without seams.
-  local background = { 0.025, 0.022, 0.018 }
+  local background = AF.Rings.BACKGROUND
   display.Bg:Hide(); display.surface:SetColorTexture(background[1], background[2], background[3], 1)
   self.ringPanel = display
-  for i, entry in ipairs({ { "murlos", "MURLO" }, { "steps", "STEPS" }, { "jumps", "JUMPS" } }) do
+  local anchor = CreateFrame("Frame", nil, display)
+  anchor:SetSize(260, 260); anchor:SetPoint("CENTER", display, "TOPLEFT", 152, -153)
+  local rings = AF.Rings:CreateActivitySet(anchor, 260)
+  for i, entry in ipairs(AF.Rings.ACTIVITIES) do
     local id, key = entry[1], entry[2]
-    local ring = AF.Rings:Create(display, 260 - (i - 1) * 58, 24, C[id], background)
-    ring:SetPoint("CENTER", display, "TOPLEFT", 152, -153)
-    ring:SetFrameLevel(display:GetFrameLevel() + i)
+    local ring = rings[id]
     local y = -25 - (i - 1) * 88
     local name = line(display, 310, y, 232, AF:T(key), 14, C[id])
     local value = line(display, 310, y - 23, 232, "", 25, C.white)

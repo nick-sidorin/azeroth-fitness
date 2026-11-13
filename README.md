@@ -16,7 +16,7 @@ Azeroth Fitness is an experimental activity tracker for **World of Warcraft: For
 - Eight humorous achievements with points, scrollable native-style cards and earned-first sorting
 - All 12 official WoW client locales, selected automatically from the game language
 - Native portrait-frame dashboard with right-side icon tabs, three concentric activity rings and client fonts
-- Round minimap shortcut with a running/boots icon, drag positioning, saved angle and visibility setting
+- Live three-ring minimap shortcut with drag positioning, saved angle and visibility setting
 
 ## Installation
 
@@ -41,7 +41,7 @@ The dashboard inherits the same `PortraitFrameTemplate` used by Forever's profes
 
 Each day has three goals: estimated steps (default 10,000), jumps (100) and fictional Murlocalories (300). Change them under **Settings**. The current day's targets update together; previous days retain their saved targets. Existing historical records do not acquire invented jump/Murlocalorie goals when upgrading. The step streak remains based on the daily step target.
 
-Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
+The minimap shortcut shows only a miniature set of the same three rings, updated after activity, goal changes and reset even with the dashboard closed. A one-shot local-midnight timer handles day rollover without continuous polling; hiding the shortcut cancels it. Clients without radial support retain the Sprint shortcut. Left-click the minimap shortcut to toggle the dashboard, right-click for settings, or drag it around the edge of the minimap. Its angle and visibility persist across reloads. The same Blizzard Sprint icon identifies the addon in the addon list. The header drags the window, and Escape closes it. Window scale adapts when opened on a small UI.
 
 Settings register under **Options → AddOns → Azeroth Fitness** when the native canvas API is available. `/af settings`, the settings side tab and minimap right-click open that same form, using current saved goals/stride/minimap preferences. Clients without that API retain the embedded form; there is no second settings store. **Report a problem** opens a copyable Issues URL with localized instructions. It does not open a browser or submit a report. Dashboard refresh timers exist only while the activity window is visible.
 

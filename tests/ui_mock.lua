@@ -189,4 +189,12 @@ C_Timer = { NewTicker = function(_, callback)
   Mock.tickers[#Mock.tickers + 1] = function() if not timer.cancelled then callback() end end
   return timer
 end }
+Mock.oneShots = {}
+C_Timer.NewTimer = function(delay, callback)
+  local timer = { delay = delay, callback = callback, cancelled = false,
+    Cancel = function(self) self.cancelled = true end }
+  Mock.oneShots[#Mock.oneShots + 1] = timer
+  return timer
+end
+
 return Mock

@@ -4,6 +4,8 @@ Versions follow Semantic Versioning.
 
 ## [Unreleased]
 ### Added
+- Live miniature activity rings on the minimap without a decorative icon/frame, sharing the dashboard renderer, palette and daily targets
+- Activity/goal/reset-driven minimap refresh and a cancellable local-midnight timer independent of dashboard visibility
 - Three nested, round-capped daily activity rings using the native radial texture API, with numeric goals and a horizontal-meter capability fallback
 - Adopt shared standards 0.1.1 requiring native component and documented API discovery before custom Blizzard-style UI
 - Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts

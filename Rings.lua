@@ -1,6 +1,9 @@
 local _, AF = ...
 local Rings = {}
 AF.Rings = Rings
+Rings.COLORS = { steps = { 0.65, 0.90, 0.20 }, jumps = { 0.15, 0.78, 0.94 }, murlos = { 0.95, 0.26, 0.36 } }
+Rings.BACKGROUND = { 0.025, 0.022, 0.018 }
+Rings.ACTIVITIES = { { "murlos", "MURLO" }, { "steps", "STEPS" }, { "jumps", "JUMPS" } }
 local MASK = "Interface\\CHARACTERFRAME\\TempPortraitAlphaMask"
 
 function Rings:IsSupported(parent)
@@ -23,7 +26,7 @@ end
 
 function Rings:Create(parent, diameter, thickness, tint, background)
   local ring = CreateFrame("Frame", nil, parent)
-  ring:SetSize(diameter, diameter)
+  ring:SetSize(diameter, diameter); ring:EnableMouse(false)
   ring.track = circle(ring, diameter, { tint[1] * 0.18, tint[2] * 0.18, tint[3] * 0.18 }, "BACKGROUND", 0)
   ring.fill = circle(ring, diameter, tint, "ARTWORK", 0)
   -- The documented default start is at the bottom; rotate the fill to twelve o'clock.
@@ -49,4 +52,15 @@ function Rings:Create(parent, diameter, thickness, tint, background)
   function ring:GetProgress() return self.value end
   ring:SetProgress(0)
   return ring
+end
+
+function Rings:CreateActivitySet(parent, diameter)
+  local rings, scale = {}, diameter / 260
+  for i, entry in ipairs(self.ACTIVITIES) do
+    local id = entry[1]
+    local ring = self:Create(parent, (260 - (i - 1) * 58) * scale, 24 * scale, self.COLORS[id], self.BACKGROUND)
+    ring:SetPoint("CENTER"); ring:SetFrameLevel(parent:GetFrameLevel() + i)
+    rings[id] = ring
+  end
+  return rings
 end
