@@ -2,7 +2,11 @@
 
 Reviewed **2026-11-10** against `wow-addon-standards` **0.1.0**, commit `f36540efe61eb90671be1359849cbc6d2ddd85c1`. The source instructions and field notes were read in full. The dependency uses the same vendored-copy/lock/sync pattern as No Quest Hints Forever. It is not loaded by WoW or fetched during CI.
 
-## Reviewed update — 2026-11-12
+## Reviewed update — 2026-11-18
+
+Adopted the complete reviewed upstream standards 0.1.3 at `31bd3999982e151682b3c387d137203158fc8186`, squash-merged through [shared PR #3](https://github.com/nick-sidorin/wow-addon-standards/pull/3) after exact-head CI. This includes the 0.1.2 NoQuestHints lifecycle/taint/rollback findings and the 0.1.3 Azeroth Fitness atlas, independent-view, stable-ID/progress and build-recovery lessons. The tool is unchanged; synchronization updates documents/lock only. Conditional native-HUD/CVar/gameplay-timer rules do not introduce absent product features. Source/mock/client evidence boundaries remain explicit; unconfirmed rendering fixes are not promoted to verified recipes.
+
+## Earlier reviewed update — 2026-11-12
 
 Adopted standards 0.1.1 at `8e71f4977463b11881def59962f13f7277ae4f98`, squash-merged in [shared standards PR #1](https://github.com/nick-sidorin/wow-addon-standards/pull/1). The reviewed diff requires native component/documented API discovery before custom Blizzard-style UI, permits safe native-art fallbacks with an explicit reason and records the matching-source/client-verification boundary. The sync tool is unchanged. Updated the vendored documents and lock through the existing tool in the current UI PR; no addon runtime or version changed.
 

@@ -7,7 +7,7 @@ Versions follow Semantic Versioning.
 - Live miniature activity rings on the minimap without a decorative icon/frame, sharing the dashboard renderer, palette and daily targets
 - Activity/goal/reset-driven minimap refresh and a cancellable local-midnight timer independent of dashboard visibility
 - Three nested, round-capped daily activity rings using the native radial texture API, with numeric goals and a horizontal-meter capability fallback
-- Adopt shared standards 0.1.1 requiring native component and documented API discovery before custom Blizzard-style UI
+- Adopt shared standards 0.1.3 covering native component/API discovery, UI state/layers, independent views, safe lifecycle/recovery and verified build dependencies
 - Click earned notifications to open the Achievements tab, scroll to the matching sorted card and highlight it without discarding queued alerts
 - Green achievement-card progress bars with localized current/target counters, driven by the same metrics/thresholds as unlocking
 - Eight 10-point addon achievements, including First Steps at 50 estimated steps; framed native textured cards, a total-points bar and desaturated locked state and earned-first scrolling list

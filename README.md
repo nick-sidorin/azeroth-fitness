@@ -97,7 +97,7 @@ Unaffiliated with Apple, Blizzard or the WoW: Forever team.
 
 ## Development, builds and releases
 
-Development follows the [pinned shared addon standards](docs/standards/README.md), version 0.1.1 at `8e71f4977463b11881def59962f13f7277ae4f98`, following the No Quest Hints Forever adoption pattern. The [lock](docs/standards/standards.lock.json) records document hashes. `python3 scripts/standards.py check` verifies local integrity offline and runs in CI; updates require a reviewed commit and adoption PR. The addon does not load or package this dependency. See the [alignment audit](docs/STANDARDS_ALIGNMENT.md) for main versus pending UI work and the [release handoff contract](docs/RELEASE_HANDOFF.md).
+Development follows the [pinned shared addon standards](docs/standards/README.md), version 0.1.3 at `31bd3999982e151682b3c387d137203158fc8186`, following the No Quest Hints Forever adoption pattern. The [lock](docs/standards/standards.lock.json) records document hashes. `python3 scripts/standards.py check` verifies local integrity offline and runs in CI; updates require a reviewed commit and adoption PR. The addon does not load or package this dependency. See the [alignment audit](docs/STANDARDS_ALIGNMENT.md) for main versus pending UI work and the [release handoff contract](docs/RELEASE_HANDOFF.md).
 
 This repository follows the same GitHub Flow as [No Quest Hints Forever](https://github.com/nick-sidorin/no-quest-hints-forever): feature branch → PR into `main` → passing `build` → squash merge. The owner configures repository rules separately: require PRs and the `build` status check, and allow only squash merging. A passing check does not prove that branch protection requires it.
 
