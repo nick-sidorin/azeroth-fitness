@@ -47,6 +47,11 @@ function AF:Today()
   return day, key
 end
 
+-- Keep the always-visible shortcut independent from the dashboard's refresh timer.
+function AF:NotifyActivityChanged(day)
+  if self.MinimapButton and self.MinimapButton.Refresh then self.MinimapButton:Refresh(day) end
+end
+
 function AF:SetDailyGoals(steps, jumps, murlos)
   local function valid(value, minimum, maximum)
     return type(value) == "number" and value == value and value >= minimum and value <= maximum
@@ -59,6 +64,7 @@ function AF:SetDailyGoals(steps, jumps, murlos)
   local day = self:Today()
   day.goal = self.char.goal
   day.activityGoals = { jumps = self.char.activityGoals.jumps, murlos = self.char.activityGoals.murlos }
+  self:NotifyActivityChanged(day)
   return true
 end
 
@@ -99,6 +105,7 @@ function AF:RecordTravel(mode, yards, seconds, source, strideGait)
     self:Say(self:T("GOAL_DONE"))
   end
   self:CheckAchievements()
+  self:NotifyActivityChanged(day)
 end
 
 function AF:RecordJump()
@@ -109,6 +116,7 @@ function AF:RecordJump()
   self.char.total.jumps = self.char.total.jumps + 1
   self.char.total.murlos = self.char.total.murlos + self.MURLO_JUMP
   self:CheckAchievements()
+  self:NotifyActivityChanged(day)
 end
 
 function AF:FootYards(ledger)
@@ -156,28 +164,104 @@ function AF:Aggregate(lastDays)
   return result
 end
 
+-- The same progress getter/target drives both unlocking and the visible meter.
 AF.ACHIEVEMENTS = {
-  { id = "touchGrass", name = "Touch Grass", desc = "10,000 lifetime steps", value = function(a) return a.char.total.steps >= 10000 end },
-  { id = "stillSitting", name = "Still Sitting", desc = "50,000 steps in one day", value = function(a) local _, n = a:BestDay(); return n >= 50000 end },
-  { id = "backpedal", name = "Backpedal Champion", desc = "1,000 yards backward", value = function(a) return (a.char.total.yards.back or 0) >= 1000 end },
-  { id = "crabMode", name = "Crab Mode", desc = "10 km of strafing", value = function(a)
+  { id = "firstSteps", target = 50, progress = function(a) return a.char.total.steps end },
+  { id = "touchGrass", target = 10000, progress = function(a) return a.char.total.steps end },
+  { id = "stillSitting", target = 50000, progress = function(a) local _, n = a:BestDay(); return n end },
+  { id = "backpedal", target = 1000, unit = "YARDS", progress = function(a) return a.char.total.yards.back or 0 end },
+  { id = "crabMode", target = 10000, unit = "METERS", progress = function(a)
       local y = (a.char.total.yards.strafeLeft or 0) + (a.char.total.yards.strafeRight or 0)
-      return y * a.METERS_PER_YARD >= 10000
+      return y * a.METERS_PER_YARD
     end },
-  { id = "jumpAddict", name = "Jump Addict", desc = "1,000 jumps", value = function(a) return a.char.total.jumps >= 1000 end },
-  { id = "marathon", name = "Azeroth Marathon", desc = "42.195 km on foot", value = function(a) return a:FootYards(a.char.total) * a.METERS_PER_YARD >= 42195 end },
-  { id = "couch", name = "Professional Couch Adventurer", desc = "7-day goal streak", value = function(a) return a:Streak() >= 7 end },
+  { id = "jumpAddict", target = 1000, progress = function(a) return a.char.total.jumps end },
+  { id = "marathon", target = 42195, unit = "METERS", progress = function(a) return a:FootYards(a.char.total) * a.METERS_PER_YARD end },
+  { id = "couch", target = 7, progress = function(a) return a:Streak() end },
 }
+
+local awardIcons = {
+  firstSteps = "Ability_Rogue_Sprint", touchGrass = "INV_Misc_Herb_01",
+  stillSitting = "INV_Misc_Book_09", backpedal = "Ability_Rogue_Feint",
+  crabMode = "INV_Misc_Fish_14", jumpAddict = "Ability_Kick",
+  marathon = "Achievement_Explore_EasternKingdoms", couch = "Achievement_Level_10",
+}
+for _, award in ipairs(AF.ACHIEVEMENTS) do
+  award.points = 10
+  award.icon = "Interface\\Icons\\" .. awardIcons[award.id]
+end
+AF.ACHIEVEMENT_ICON = "Interface\\Icons\\Achievement_PVP_A_01"
+
+function AF:GetAchievementProgress(award)
+  local current = self.char and award.progress(self) or 0
+  -- Earned awards remain complete even when a current streak later expires.
+  if self.char and self.char.achievements[award.id] then current = award.target end
+  return math.max(0, math.min(award.target, current)), award.target, award.unit
+end
+
+function AF:FormatAchievementProgress(award)
+  local current, target, unit = self:GetAchievementProgress(award)
+  local counter = self:FormatNumber(math.floor(current)) .. " / " .. self:FormatNumber(target)
+  return unit and counter .. " " .. self:T(unit) or counter
+end
+
+function AF:FormatAchievementDate(dayKey)
+  if type(dayKey) ~= "string" then return "" end
+  local year, month, day = dayKey:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
+  if not year then return "" end
+  year, month, day = tonumber(year) % 100, tonumber(month), tonumber(day)
+  if self.locale == "koKR" or self.locale == "zhCN" or self.locale == "zhTW" then
+    return string.format("%02d/%d/%d", year, month, day)
+  end
+  if self.locale == "enUS" or not self.locales[self.locale] then
+    return string.format("%d/%d/%02d", month, day, year)
+  end
+  return string.format("%d/%d/%02d", day, month, year)
+end
+
+function AF:GetAchievementList()
+  local result = {}
+  for index, award in ipairs(self.ACHIEVEMENTS) do
+    local earned = self.char and self.char.achievements[award.id]
+    result[#result + 1] = { award = award, earned = not not earned, date = earned, order = index }
+  end
+  table.sort(result, function(a, b)
+    if a.earned ~= b.earned then return a.earned end
+    return a.order < b.order
+  end)
+  return result
+end
+
+function AF:GetAchievementPoints()
+  local earned, available = 0, 0
+  for _, award in ipairs(self.ACHIEVEMENTS) do
+    available = available + award.points
+    if self.char and self.char.achievements[award.id] then earned = earned + award.points end
+  end
+  return earned, available
+end
 
 function AF:CheckAchievements()
   if not self.char then return end
   self.char.achievements = self.char.achievements or {}
   for _, award in ipairs(self.ACHIEVEMENTS) do
-    if not self.char.achievements[award.id] and award.value(self) then
+    if not self.char.achievements[award.id] and award.progress(self) >= award.target then
       self.char.achievements[award.id] = self:DayKey()
       self:Say(string.format(self:T("AWARD_UNLOCKED"), self:T("AWARD_" .. award.id)))
+      if self.Achievements then self.Achievements:Earned(award) end
     end
   end
+end
+
+-- Temporary character-only testing reset. The slash entry requests confirmation.
+function AF:ResetStatistics()
+  if not self.char then return end
+  self.char.days, self.char.total, self.char.achievements = {}, self:NewLedger(), {}
+  local day = self:Today()
+  if self.Motion and self.Motion.Reset then self.Motion.Reset() end
+  if self.Jump and self.Jump.Reset then self.Jump.Reset() end
+  if self.Achievements then self.Achievements:Clear() end
+  if self.UI then self.UI:Refresh() end
+  self:NotifyActivityChanged(day)
 end
 
 function AF:Say(message)
@@ -250,4 +334,5 @@ function AF:Login()
       today.activityGoals[key] = default
     end
   end
+  self:NotifyActivityChanged(today)
 end

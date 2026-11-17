@@ -20,6 +20,8 @@ boot:SetScript("OnEvent", function(_, event, addon)
         AF.UI:Show("history")
       elseif arg == "settings" then
         AF.UI:Show("settings")
+      elseif arg == "reset" then
+        AF.Achievements:RequestReset()
       elseif arg == "debug" then
         local p = AF.Motion.probe
         AF:Say(string.format(AF:T("PROBE"), p.mode, p.source))

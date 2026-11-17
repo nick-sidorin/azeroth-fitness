@@ -23,18 +23,43 @@ function Shortcut:UpdateDrag()
   self:Position()
 end
 
-function Shortcut:Init(ui)
-  local angle = AF.db.minimapAngle
-  if type(angle) ~= "number" or angle ~= angle or math.abs(angle) == math.huge then
-    AF.db.minimapAngle = 225
+function Shortcut:Refresh(day)
+  if not self.button or not self.button:IsVisible() or not self.rings or not AF.char then return end
+  day = day or AF:Today()
+  local targets = { steps = day.goal, jumps = day.activityGoals.jumps, murlos = day.activityGoals.murlos }
+  for id, ring in pairs(self.rings) do ring:SetProgress(day[id] / targets[id]) end
+end
+
+function Shortcut:CancelDayTimer()
+  self.dayTimerGeneration = (self.dayTimerGeneration or 0) + 1
+  if self.dayTimer then self.dayTimer:Cancel(); self.dayTimer = nil end
+end
+
+function Shortcut:ScheduleDayReset()
+  self:CancelDayTimer()
+  if not self.rings or not AF.char or not self.button:IsVisible()
+      or not C_Timer or type(C_Timer.NewTimer) ~= "function" then return end
+  local now = time()
+  local nextDay = date("*t", now)
+  nextDay.day, nextDay.hour, nextDay.min, nextDay.sec = nextDay.day + 1, 0, 0, 1
+  nextDay.isdst = nil
+  local generation = self.dayTimerGeneration
+  self.dayTimer = C_Timer.NewTimer(math.max(1, time(nextDay) - now), function()
+    if generation ~= self.dayTimerGeneration then return end
+    self.dayTimer = nil
+    self:Refresh(); self:ScheduleDayReset()
+  end)
+end
+
+function Shortcut:BuildIcon(button)
+  self.rings, self.icon, self.border = nil, nil, nil
+  if AF.Rings and AF.Rings:IsSupported(button) then
+    local canvas = CreateFrame("Frame", nil, button)
+    canvas:SetSize(30, 30); canvas:SetPoint("CENTER"); canvas:EnableMouse(false)
+    self.rings = AF.Rings:CreateActivitySet(canvas, 30)
+    return
   end
-  local button = CreateFrame("Button", "AzerothFitnessMinimapButton", Minimap)
-  self.button = button
-  button:SetSize(31, 31)
-  button:SetFrameStrata("MEDIUM")
-  button:SetFrameLevel(Minimap:GetFrameLevel() + 8)
-  button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-  button:RegisterForDrag("LeftButton")
+  -- Preserve a usable native shortcut on clients without radial texture support.
   local background = button:CreateTexture(nil, "BACKGROUND")
   background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
   background:SetSize(24, 24)
@@ -54,6 +79,24 @@ function Shortcut:Init(ui)
   border:SetPoint("TOPLEFT")
   button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
   self.icon, self.border = icon, border
+end
+
+function Shortcut:Init(ui)
+  if self.button then self.button:Hide() end
+  self:CancelDayTimer()
+  local angle = AF.db.minimapAngle
+  if type(angle) ~= "number" or angle ~= angle or math.abs(angle) == math.huge then
+    AF.db.minimapAngle = 225
+  end
+  local button = CreateFrame("Button", "AzerothFitnessMinimapButton", Minimap)
+  self.button = button
+  button:Hide()
+  button:SetSize(31, 31)
+  button:SetFrameStrata("MEDIUM")
+  button:SetFrameLevel(Minimap:GetFrameLevel() + 8)
+  button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  button:RegisterForDrag("LeftButton")
+  self:BuildIcon(button)
 
   local function stop()
     button.dragging = false
@@ -68,7 +111,8 @@ function Shortcut:Init(ui)
     button:SetScript("OnUpdate", function() self:UpdateDrag() end)
   end)
   button:SetScript("OnDragStop", stop)
-  button:SetScript("OnHide", stop)
+  button:SetScript("OnHide", function() stop(); self:CancelDayTimer() end)
+  button:SetScript("OnShow", function() self:Refresh(); self:ScheduleDayReset() end)
   button:SetScript("OnClick", function(_, mouseButton)
     if button.dragged then return end
     if mouseButton == "RightButton" then ui:Show("settings") else ui:Toggle() end
@@ -81,7 +125,10 @@ function Shortcut:Init(ui)
     GameTooltip:Show()
   end)
   button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  if Minimap.HookScript then Minimap:HookScript("OnSizeChanged", function() self:Position() end) end
+  if Minimap.HookScript and not self.mapSizeHooked then
+    Minimap:HookScript("OnSizeChanged", function() self:Position() end)
+    self.mapSizeHooked = true
+  end
   self:Position()
   button:SetShown(AF.db.showMinimap)
   return button

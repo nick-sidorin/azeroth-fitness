@@ -17,7 +17,8 @@ concurrency:
 jobs:
   publish:
     if: github.repository == 'nick-sidorin/azeroth-fitness' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    # Keep Lua packaging builds on a fixed LTS image as ubuntu-latest rolls forward.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,9 +40,7 @@ jobs:
 
       - name: Install Lua 5.1
         if: steps.request.outputs.requested == 'true'
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lua5.1
+        run: bash scripts/install_lua51.sh "$RUNNER_TEMP/azeroth-fitness-lua"
 
       - name: Test and validate requested version
         if: steps.request.outputs.requested == 'true'

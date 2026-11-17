@@ -40,6 +40,11 @@ watcher:SetScript("OnUpdate", function()
   end
 end)
 
+function Jump.Reset()
+  pendingAt, lastCount = nil, -10
+  watcher:Hide()
+end
+
 function Jump.Start()
   if not JumpOrAscendStart or not hooksecurefunc then return end
   hooksecurefunc("JumpOrAscendStart", function()
